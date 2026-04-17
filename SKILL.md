@@ -34,7 +34,7 @@ Resolve in this order (first match wins):
 ### EP prefix (`<prefix>`)
 
 The frontmatter field name for the EP number (e.g. `ep: 3` or
-`gep: 3`). Resolve in this order:
+`rfc: 3`). Resolve in this order:
 
 1. **`.ep-kit` config file** — if found (see above) and it contains
    `prefix=<name>`, use that value.
@@ -68,8 +68,8 @@ A plain text file with `key=value` lines, one per line. Blank lines
 and lines starting with `#` are ignored. Supported keys:
 
 ```
-dir=docs/geps              # EP directory (relative to config file)
-prefix=gep                 # frontmatter field name (default: ep)
+dir=docs/eps               # EP directory (relative to config file)
+prefix=ep                  # frontmatter field name (default: ep)
 validator=./validate.sh    # path to validate.sh
 skip_sections=1            # skip required section checks (for retrofits)
 kit_version=0.1.0          # ep-kit version this config was generated for
@@ -112,8 +112,8 @@ template:
    the next unused number and survey what's already decided.
 3. **Detect architectural baseline (optional).** Scan the index for
    an Informational EP with `extended-by` containing 3+ entries —
-   that's likely the project's architectural baseline (like Glorbo's
-   GEP-2). If found, read it for context. Most Standards EPs will
+   that's likely the project's architectural baseline (like EP-1).
+   If found, read it for context. Most Standards EPs will
    reference it via `requires: [N]`.
 
 ## Process
@@ -360,7 +360,7 @@ typically reviewed before landing.
 - **Default `status: Draft`.** Only flip to `Accepted` when the user
   explicitly approves.
 - **Use `<prefix>` for the frontmatter number field.** Don't hardcode
-  `ep` — the project may use `gep`, `rfc`, `kep`, or another name.
+  `ep` — the project may use `rfc`, `adr`, `kep`, or another name.
 
 ## Red flags to watch for
 

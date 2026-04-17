@@ -3,16 +3,15 @@
 #
 # Usage:
 #   ./validate.sh                  # validate all EPs in docs/eps/
-#   ./validate.sh docs/geps/       # custom directory
-#   ./validate.sh docs/geps/0003-foo.md  # single file
-#   ./validate.sh --config .ep-kit docs/geps/  # with config file
-#   ./validate.sh --json docs/geps/  # JSON output for CI
+#   ./validate.sh docs/eps/0003-foo.md  # single file
+#   ./validate.sh --config .ep-kit docs/eps/  # with config file
+#   ./validate.sh --json docs/eps/  # JSON output for CI
 #
 # Config file (optional):
 #   If a config file exists (default: .ep-kit in project root), it can
 #   override defaults. Supported keys:
-#     prefix=gep          # frontmatter field name (default: ep)
-#     dir=docs/geps       # default directory to validate
+#     prefix=ep           # frontmatter field name (default: ep)
+#     dir=docs/eps        # default directory to validate
 #     skip_sections=1     # skip required section checks (for retrofits)
 #
 # Exit codes:

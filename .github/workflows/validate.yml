@@ -5,12 +5,16 @@ on:
     branches: [main]
     paths:
       - 'docs/eps/**'
+      - 'docs/geps/**'
+      - 'examples/**'
       - 'validate.sh'
       - '.ep-kit'
   pull_request:
     branches: [main]
     paths:
       - 'docs/eps/**'
+      - 'docs/geps/**'
+      - 'examples/**'
       - 'validate.sh'
       - '.ep-kit'
 
@@ -27,13 +31,15 @@ jobs:
       - name: Validate EPs
         run: |
           chmod +x validate.sh
-          # Try with config first, fall back to default directory
-          if [ -f ".ep-kit" ]; then
+          # Find the first available EP directory
+          if [ -f ".ep-kit" ] && [ -d "docs/eps" ]; then
             ./validate.sh --json docs/eps/
           elif [ -d "docs/eps" ]; then
             ./validate.sh --json docs/eps/
           elif [ -d "docs/geps" ]; then
             ./validate.sh --json docs/geps/
+          elif [ -d "examples" ]; then
+            ./validate.sh --json examples/
           else
             echo "No EP directory found"
             exit 1

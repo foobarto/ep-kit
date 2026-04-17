@@ -1,5 +1,5 @@
 ---
-design: 3
+ep: 3
 title: Example — Custom Prefix Configuration
 author: EP Kit Team <team@ep-kit.example>
 status: Draft
@@ -16,9 +16,9 @@ The EP Kit supports configurable frontmatter field names via the `prefix` key in
 
 ## Goals
 
-- Demonstrate a working EP with `design:` as the frontmatter field name
-- Show how `.ep-kit` config maps `prefix=design` to validate correctly
+- Demonstrate how `.ep-kit` config maps `prefix=design` to validate correctly
 - Provide a template for teams migrating from ADR systems
+- Show the `--config` flag usage for custom config files
 
 ## Non-goals
 
@@ -27,7 +27,7 @@ The EP Kit supports configurable frontmatter field names via the `prefix` key in
 
 ## Design
 
-This EP uses `design: 3` in frontmatter instead of `ep: 3`. When validated with:
+This example demonstrates custom prefix usage via the `--config` flag:
 
 ```bash
 ./validate.sh --config .ep-kit-custom examples/
@@ -39,7 +39,7 @@ Where `.ep-kit-custom` contains:
 prefix=design
 ```
 
-The validator correctly identifies the EP number, validates filename consistency, and checks all required sections.
+To use a custom prefix, create an EP with the custom field name (e.g., `design: 3`) and pass the config file to the validator. The validator will then correctly identify the EP number, validate filename consistency, and check all required sections.
 
 ### D1. Custom prefix support confirmed
 
@@ -49,6 +49,23 @@ The validator correctly identifies the EP number, validates filename consistency
 
 **Why:** Config-driven approach is infinitely extensible and keeps the validator generic.
 
+## Decision log
+
+See D1 above.
+
+## Migration
+
+Teams with existing ADR/DRF systems can set `prefix=<name>` in `.ep-kit` to avoid renaming all frontmatter fields.
+
+## Failure modes
+
+- Forgetting to pass `--config` causes validation to fail with "missing prefix" errors
+- Using wrong prefix in config causes silent mismatches between filename and field
+
+## Test strategy
+
+Run `./validate.sh --config .ep-kit-custom examples/0003-example-custom-prefix.md` to verify.
+
 ## Open questions
 
-- Should we ship a `.ep-kit-custom` example file alongside this EP?
+- Should we auto-detect prefix from first EP file found?

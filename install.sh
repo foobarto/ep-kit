@@ -153,7 +153,7 @@ fi
 echo ""
 echo "Done. Next steps:"
 echo "  1. Edit $EPS_DIR/0001-ep-purpose-and-guidelines.md with your project name"
-echo "  2. Edit $CONFIG_FILE if you need a custom prefix (e.g. prefix=gep)"
+echo "  2. Edit $CONFIG_FILE if you need a custom prefix (e.g. prefix=rfc)"
 echo "  3. Open a PR with the new EP directory"
 if [[ -n "$SKILL_DIR" ]]; then
     echo "  4. Tell your AI assistant: 'new EP for X'"
