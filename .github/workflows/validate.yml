@@ -1,0 +1,40 @@
+name: Validate EPs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/eps/**'
+      - 'validate.sh'
+      - '.ep-kit'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/eps/**'
+      - 'validate.sh'
+      - '.ep-kit'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate EPs
+        run: |
+          chmod +x validate.sh
+          # Try with config first, fall back to default directory
+          if [ -f ".ep-kit" ]; then
+            ./validate.sh --json docs/eps/
+          elif [ -d "docs/eps" ]; then
+            ./validate.sh --json docs/eps/
+          elif [ -d "docs/geps" ]; then
+            ./validate.sh --json docs/geps/
+          else
+            echo "No EP directory found"
+            exit 1
+          fi

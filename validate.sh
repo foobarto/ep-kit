@@ -33,6 +33,7 @@ ERRORS=0
 WARNINGS=0
 FILES_CHECKED=0
 JSON_MODE=false
+NO_AUTOCONFIG=false
 
 # JSON output accumulator
 JSON_OUTPUT=""
@@ -523,6 +524,10 @@ main() {
                 JSON_MODE=true
                 shift
                 ;;
+            --no-autoconfig)
+                NO_AUTOCONFIG=true
+                shift
+                ;;
             --help|-h)
                 echo "Usage: $0 [options] [directory | file]"
                 echo ""
@@ -530,6 +535,7 @@ main() {
                 echo "  --config <file>    Load config from file (default: .ep-kit)"
                 echo "  --skip-sections    Skip required section checks"
                 echo "  --json             Output JSON instead of colored text"
+                echo "  --no-autoconfig    Disable auto-discovery of .ep-kit config"
                 echo "  --help             Show this help"
                 echo ""
                 echo "Config file keys:"
@@ -565,14 +571,17 @@ main() {
     fi
 
     # Load config (try explicit, then project root relative to target, then CWD)
+    # Skip auto-discovery if --no-autoconfig is set
     if [[ -n "$config_file" ]]; then
         load_config "$config_file"
-    elif [[ -f "$ep_dir/../../.ep-kit" ]]; then
-        load_config "$ep_dir/../../.ep-kit"
-    elif [[ -f "$ep_dir/../.ep-kit" ]]; then
-        load_config "$ep_dir/../.ep-kit"
-    elif [[ -f ".ep-kit" ]]; then
-        load_config ".ep-kit"
+    elif ! $NO_AUTOCONFIG; then
+        if [[ -f "$ep_dir/../../.ep-kit" ]]; then
+            load_config "$ep_dir/../../.ep-kit"
+        elif [[ -f "$ep_dir/../.ep-kit" ]]; then
+            load_config "$ep_dir/../.ep-kit"
+        elif [[ -f ".ep-kit" ]]; then
+            load_config ".ep-kit"
+        fi
     fi
 
     if $JSON_MODE; then
