@@ -1,6 +1,6 @@
 ---
 name: ep-kit-validate
-version: 0.1.0
+version: 1.0.0
 description: Use when the user wants to review or validate an existing Enhancement Proposal for semantic quality. Triggers on phrases like "review this EP", "validate EP-3", "is this EP good?", "check EP quality", "EP review". Performs a thorough semantic audit covering problem clarity, decision log honesty, scope correctness, alternative quality, and internal consistency.
 ---
 

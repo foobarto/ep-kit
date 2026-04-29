@@ -604,15 +604,8 @@ main() {
             echo ""
         fi
 
-        # Skip template file
-        if [[ -f "$ep_dir/0000-template.md" ]]; then
-            if ! $JSON_MODE; then
-                echo "Skipping 0000-template.md (template file)"
-            fi
-        fi
-
-        local files
-        files=$(find "$ep_dir" -name '[0-9][0-9][0-9][0-9]-*.md' -type f | sort)
+        # Collect files and skip template
+        files=$(find "$ep_dir" -name '[0-9][0-9][0-9][0-9]-*.md' -type f | sort | grep -v '/0000-template.md$' || true)
         if [[ -z "$files" ]]; then
             echo "No EP files found in $ep_dir/" >&2
             exit 1
@@ -620,6 +613,52 @@ main() {
 
         # Check for duplicate EP numbers
         check_duplicate_numbers "$ep_dir"
+
+        while IFS= read -r file; do
+            local bname
+            bname=$(basename "$file")
+            if ! $JSON_MODE; then
+                echo "━━━ $bname ━━━"
+            fi
+            validate_ep "$file"
+            if ! $JSON_MODE; then
+                echo ""
+            fi
+        done <<< "$files"
+    fi
+
+    if $JSON_MODE; then
+        emit_json "],"
+        emit_json "\"summary\":{\"files_checked\":$FILES_CHECKED,\"errors\":$ERRORS,\"warnings\":$WARNINGS}}"
+        echo "$JSON_OUTPUT"
+    else
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "Checked: $FILES_CHECKED file(s)"
+        if [[ $ERRORS -gt 0 ]]; then
+            echo -e "${RED}Errors:   $ERRORS${NC}"
+        else
+            echo -e "${GREEN}Errors:   0${NC}"
+        fi
+        if [[ $WARNINGS -gt 0 ]]; then
+            echo -e "${YELLOW}Warnings: $WARNINGS${NC}"
+        else
+            echo -e "${GREEN}Warnings: 0${NC}"
+        fi
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    fi
+
+    if [[ $ERRORS -gt 0 ]]; then
+        exit 1
+    fi
+    exit 0
+}
+
+main "$@"
+ || true)
+        if [[ -z "$files" ]]; then
+            echo "No EP files found in $ep_dir/" >&2
+            exit 1
+        fi
 
         while IFS= read -r file; do
             local bname

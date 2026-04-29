@@ -145,7 +145,7 @@ else
 dir=$EPS_DIR
 prefix=ep
 validator=$SCRIPT_DIR/validate.sh
-kit_version=0.1.0
+kit_version=1.0.0
 EOF
     fi
 fi

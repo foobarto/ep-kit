@@ -2,6 +2,30 @@
 
 All notable changes to the EP Kit itself.
 
+## [1.0.0] — 2026-04-30
+
+First stable release. The schema, skill workflow, and validator
+contract are now considered stable; future breaking changes will be
+gated behind a major version bump.
+
+### Added
+
+- **Duplicate-number detection** — `validate.sh` now flags two EPs
+  claiming the same number when run in directory mode, before any
+  per-file validation runs.
+- **JSON output for directory mode** — `validate.sh --json` now emits
+  a single well-formed document covering every EP scanned plus a
+  summary block (`files_checked`, `errors`, `warnings`).
+
+### Changed
+
+- **Stable file enumeration** — directory mode now collects EP files
+  via a sorted `find` that explicitly skips `0000-template.md`,
+  removing shell-glob edge cases on case-insensitive filesystems.
+- **Template `created:` field** — `templates/0000-template.md` now
+  ships with a real ISO date placeholder so a fresh copy passes the
+  validator without manual frontmatter surgery.
+
 ## [0.2.0] — 2026-04-17
 
 ### Added

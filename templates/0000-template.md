@@ -4,9 +4,9 @@ title: Short descriptive title     # ~60 chars max
 author: Your Name <you@example.com>
 status: Draft                      # Placeholder for early idea capture; Draft for active iteration (see EP-1)
 type: Standards                    # Standards | Informational | Process
-created: YYYY-MM-DD
+created: 2026-04-22
 history:
-  - date: YYYY-MM-DD
+  - date: 2026-04-22
     status: Draft
     note: Initial draft.
 # Optional — add only the fields you need:

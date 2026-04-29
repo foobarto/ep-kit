@@ -1,6 +1,6 @@
 ---
 name: ep-kit
-version: 0.1.0
+version: 1.0.0
 description: Use when the user wants to create a new EP (Enhancement Proposal) — a design document describing a proposed change to the project. Triggers on phrases like "new EP", "write an EP", "propose X as an EP", "document this decision as an EP". Guides the user through a structured Q&A to produce a well-formed EP file with correct frontmatter, numbering, and the required sections including a decision log. Also handles superseding or extending existing EPs with bidirectional-link updates.
 ---
 
@@ -72,7 +72,7 @@ dir=docs/eps               # EP directory (relative to config file)
 prefix=ep                  # frontmatter field name (default: ep)
 validator=./validate.sh    # path to validate.sh
 skip_sections=1            # skip required section checks (for retrofits)
-kit_version=0.1.0          # ep-kit version this config was generated for
+kit_version=1.0.0          # ep-kit version this config was generated for
 ```
 
 ## Setup check
