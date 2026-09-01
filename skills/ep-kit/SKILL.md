@@ -1,6 +1,6 @@
 ---
 name: ep-kit
-description: Use when the user wants to create a new EP (Enhancement Proposal) — a design document describing a proposed change to the project. Triggers on phrases like "new EP", "write an EP", "propose X as an EP", "document this decision as an EP". Guides the user through a structured Q&A to produce a well-formed EP file with correct frontmatter, numbering, and the required sections including a decision log. Also handles superseding or extending existing EPs with bidirectional-link updates.
+description: Use when an EP Kit governance preflight routes an architectural decision to proposal authoring, or when the user explicitly asks to create, extend, or supersede an Enhancement Proposal. Do not use to classify ordinary project work; use ep-kit-governance first.
 ---
 
 # Enhancement Proposal Kit: Write a New EP
@@ -47,15 +47,19 @@ Path to `validate.sh`. Resolve in this order:
    `validator=<path>`, use that path.
 2. **Auto-discovery** — search for `validate.sh` in these locations
    (first match wins):
+   - `validate.sh` adjacent to this `SKILL.md` (the plugin/skill-bundled helper;
+     resolve it relative to the loaded skill, not the working directory)
    - `scripts/validate-eps.sh` (default vendored installation)
    - `<ep_dir>/../../validate.sh` (ep-kit installed as sibling)
    - `<ep_dir>/../validate.sh` (ep-kit installed as parent)
    - `.agents/skills/ep-kit/validate.sh` (skill directory)
    - `.claude/skills/ep-kit/validate.sh` (skill directory)
-3. **Auto-configure** — if found via auto-discovery, write
+3. **Auto-configure** — if a project-relative validator is found via
+   auto-discovery, write
    `validator=<path>` to `.ep-kit` (create the file if it doesn't
    exist) and notify the user: "Auto-configured validator path in
-   .ep-kit — you can change it in the config file."
+   .ep-kit — you can change it in the config file." Do not persist a plugin
+   cache path for the skill-bundled helper; use it only for the current run.
 4. **Not found** — if no validator is found, skip mechanical
    validation. Tell the user: "Validator not found. Run `install.sh`
    from the ep-kit directory or set `validator=` in `.ep-kit`."
@@ -72,7 +76,7 @@ dir=docs/eps               # EP directory (relative to config file)
 prefix=ep                  # frontmatter field name (default: ep)
 validator=scripts/validate-eps.sh  # path relative to the config file
 skip_sections=1            # skip required section checks (for retrofits)
-kit_version=1.1.0          # ep-kit version this config was generated for
+kit_version=1.2.0          # ep-kit version this config was generated for
 ```
 
 ## Setup check
@@ -89,6 +93,8 @@ template:
 
 ## When to use this skill
 
+- The `ep-kit-governance` skill classified a change as Architectural and
+  EP-worthy with no existing proposal governing it.
 - User says "let's write an EP", "new EP for X", "document this as an
   EP", "propose X".
 - User is describing a design change that touches a public contract,
@@ -101,18 +107,23 @@ template:
 - Bug fixes, doc tweaks, dep bumps, perf work with no API change.
 - Open-ended brainstorming that hasn't narrowed down to a concrete
   proposal yet — finish the brainstorm first, then EP the decision.
-- Questions about EPs (read EP-1 directly).
+- Questions about EPs (read EP-0001 directly).
+
+If another design or brainstorming workflow already established answers to
+the questions below, preserve those answers and ask only what remains
+unresolved. For EP-worthy work, this EP is the durable design artifact; do not
+also write a parallel design spec for the same decision.
 
 ## Prerequisites — always check first
 
-1. **Read EP-1.** `<ep_dir>/0001-ep-purpose-and-guidelines.md` is
+1. **Read EP-0001.** `<ep_dir>/0001-ep-purpose-and-guidelines.md` is
    the authority on format, numbering, lifecycle, and conventions. If
-   it has been updated since this skill was written, EP-1 wins.
+   it has been updated since this skill was written, EP-0001 wins.
 2. **Read the index.** `<ep_dir>/README.md` shows existing EPs; pick
    the next unused number and survey what's already decided.
 3. **Detect architectural baseline (optional).** Scan the index for
    an Informational EP with `extended-by` containing 3+ entries —
-   that's likely the project's architectural baseline (like EP-1).
+   that's likely the project's architectural baseline (like EP-0001).
    If found, read it for context. Most Standards EPs will
    reference it via `requires: [N]`.
 
@@ -149,7 +160,7 @@ flag — EPs are for load-bearing decisions.
 **Q4: Does this supersede or extend an existing EP?**
 
 - List any related EPs by number. If one is being superseded, its
-  frontmatter must be updated in the same PR (see EP-1 "Updating
+  frontmatter must be updated in the same PR (see EP-0001 "Updating
   EPs" section).
 - If it extends one, add `extends: [N]` and be ready to update that
   EP's reciprocal `extended-by` field. Use `requires` only when the
@@ -220,7 +231,9 @@ For every non-obvious choice the EP makes, capture:
 
 Walk the user through every material choice from phases 1–2 and
 extract the decision log format. Number them **D1, D2, …** (not
-hierarchical — easier to cite).
+hierarchical — easier to cite). Cite a proposal as `EP-NNNN` and one of its
+decisions as `EP-NNNN D<N>`, regardless of the configured frontmatter number
+key.
 
 Minimum bars by status:
 
@@ -244,18 +257,19 @@ reflects this choice`).
 Once the Q&A is complete:
 
 1. **Pick the next EP number.** Check `<ep_dir>/README.md` index
-   for the highest existing number. Add 1. Example: if EP-8 is the
-   latest, write EP-9.
+   for the highest existing number. Add 1. Example: if `EP-0008` is the
+   latest, write `EP-0009`.
 2. **Copy the template.** `<ep_dir>/0000-template.md` is the
    skeleton. Rename to `<ep_dir>/NNNN-short-kebab-title.md`.
 3. **Fill in the frontmatter** — `<prefix>`, `title`, `author`,
-   `status: Draft`, `type`, `created` (today's date), and relevant
+   the status selected in Q6 (`Placeholder` or `Draft`), `type`, `created`
+   (today's date), and relevant
    optional fields (`requires`, `extends`, `supersedes`, `see-also`). Fields
    like `discussion-at` and `implemented-in` are filled later when
    the EP moves to Accepted or Implemented status.
-4. **Initialize the `history` field** with one entry for the Draft
-   state. Date is today. Status is `Draft`. Note should be concise —
-   "Initial draft" or "Retrofitted from pre-EP notes" for retrofits.
+4. **Initialize the `history` field** with one entry matching the selected
+   `Placeholder` or `Draft` state. Date is today. Note should be concise —
+   "Initial placeholder," "Initial draft," or "Retrofitted from pre-EP notes."
    Every subsequent status change (Draft→Accepted, Accepted→Partial,
    Partial→Implemented, etc.) appends a new entry in the PR that changes the
    status. Never edit or delete history entries.
@@ -268,14 +282,14 @@ Once the Q&A is complete:
 8. **If extending/superseding, update the linked EP's frontmatter.**
    Both changes ship together, same session:
 
-   **When superseding EP-N:**
+   **When superseding `EP-NNNN`:**
    - On the *old* EP: set `status: Superseded`
    - On the *old* EP: add `superseded-by: [M]` (use YAML list syntax)
    - On the *old* EP: append a `history` entry with today's date,
-     `status: Superseded`, and a note like "Superseded by EP-M."
+     `status: Superseded`, and a note like "Superseded by EP-MMMM."
    - On the *new* EP: add `supersedes: [N]`
 
-   **When extending EP-N:**
+   **When extending `EP-NNNN`:**
    - On the *old* EP: add M to `extended-by: [...]` (preserve
      existing entries, don't overwrite)
    - On the *new* EP: add `extends: [N]`
@@ -336,8 +350,9 @@ Tell the user:
 - Path to the new EP.
 - Validator outcome (green summary, or "no validator available").
 - What other EPs' frontmatter was updated (if any).
-- That the status is `Draft` — they need to review and approve before
-  flipping to `Accepted`.
+- Whether the status is `Placeholder` or `Draft`, what that status permits,
+  and what must happen before it can move forward. Neither authorizes
+  implementation.
 - Whether the README index was updated.
 - Any open questions you captured in §"Open questions" that they need
   to decide before acceptance.
@@ -361,8 +376,8 @@ typically reviewed before landing.
 - **Use today's date** for `created:`. Check the current date before
   writing the file (the harness exposes this via the system reminder;
   fall back to `date +%Y-%m-%d` via Bash if uncertain).
-- **Default `status: Draft`.** Only flip to `Accepted` when the user
-  explicitly approves.
+- **Default `status: Draft`.** Use `Placeholder` when selected in Q6. Only flip
+  either status to `Accepted` through the project's explicit approval process.
 - **Use `<prefix>` for the frontmatter number field.** Don't hardcode
   `ep` — the project may use `rfc`, `adr`, `kep`, or another name.
 
@@ -382,5 +397,8 @@ typically reviewed before landing.
 - **Process authority:** `<ep_dir>/0001-ep-purpose-and-guidelines.md`
 - **Template:** `<ep_dir>/0000-template.md`
 - **Index:** `<ep_dir>/README.md`
-- **Validator:** `<validator>` (mechanical checks — hard gate in Phase 5; supports `--json` for CI, `--skip-sections` for retrofits)
+- **Validator:** `<validator>` (mechanical checks — hard gate in Phase 5;
+  supports `--json` for CI, `--catalogue-json` for validated machine-readable
+  proposal metadata, and `--skip-sections` for retrofits)
 - **Review skill:** `ep-kit-validate` (semantic review — post-creation audit)
+- **Governance skill:** `ep-kit-governance` (preflight routing and post-delivery lifecycle checkpoint)

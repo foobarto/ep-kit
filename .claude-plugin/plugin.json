@@ -1,0 +1,19 @@
+{
+  "name": "ep-kit",
+  "version": "1.2.0",
+  "description": "Repository-local governance for durable architecture decisions and Enhancement Proposals.",
+  "author": {
+    "name": "Bartosz Ptaszynski",
+    "email": "bartosz@foobarto.me"
+  },
+  "homepage": "https://github.com/foobarto/ep-kit",
+  "repository": "https://github.com/foobarto/ep-kit",
+  "license": "MIT OR Apache-2.0",
+  "keywords": [
+    "architecture",
+    "decision-records",
+    "enhancement-proposals",
+    "governance",
+    "agent-skills"
+  ]
+}

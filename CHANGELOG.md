@@ -2,6 +2,70 @@
 
 All notable changes to the EP Kit itself.
 
+## [1.2.0] — 2026-09-01
+
+### Added
+
+- Project-local `ep-kit-governance` skill for change preflight, Spike / Bounded
+  / Architectural classification, existing-EP discovery, lifecycle gates, and
+  post-implementation status checks.
+- Harness-neutral behavioral evaluation scenarios covering over-activation,
+  missed architectural activation, Draft/Accepted gates, duplicate design
+  artifacts, Partial completion, upward reclassification, and architectural
+  decisions discovered during implementation.
+- Explicit interoperability contract: an EP-worthy design uses the EP as its
+  single durable design artifact and hands an Accepted EP to downstream
+  implementation planning as the specification.
+- Native Codex and Claude plugin/marketplace manifests, plus an optional
+  read-only Claude `ep-kit-reviewer` agent for independent skeptical review.
+- Stable cross-tool citations: `EP-NNNN` for proposals and `EP-NNNN D<N>` for
+  Decision Log entries, independent of the configurable frontmatter key.
+- `--catalogue-json` validator mode, which preserves deterministic diagnostics
+  and adds a versioned proposal catalogue with canonical IDs, paths, lifecycle,
+  relationships, and release metadata.
+- Protocol-only Cairn interoperability documentation covering decision
+  promotion, execution handoff, citations, and lifecycle reconciliation.
+
+### Changed
+
+- The installer now vendors all three project-local skills by default under
+  `.agents/skills/`, supports an explicit `--no-skills` opt-out, and records
+  kit version `1.2.0`.
+- Skill sources now use the canonical `skills/<name>/SKILL.md` layout directly;
+  the repository validator entry point delegates to the helper packaged with
+  the `ep-kit` skill.
+- The supported frontmatter language is explicitly frozen to the documented
+  constrained YAML subset, and YAML-ambiguous unquoted scalars are rejected;
+  EP Kit does not claim general YAML parsing.
+- The authoring skill reuses completed brainstorming instead of repeating
+  answered questions.
+- Lifecycle semantics now form an explicit consumer contract, and guidance
+  distinguishes reversible implementation details from architectural choices
+  that require an extending or superseding EP.
+
+### Fixed
+
+- Placeholder authoring now preserves the selected status in frontmatter,
+  history, and handoff instead of silently hard-coding Draft.
+- Runtime validator and installer paths avoid Bash 4 associative arrays, BSD
+  `find` incompatibilities, and GNU-only `chmod --reference`, retaining the
+  zero-package Linux/macOS path.
+- Lifecycle routing now defines explicit Draft overrides consistently and runs
+  completion checks for Process as well as Standards EPs.
+- Behavioral cases keep their rubrics hidden, treat explicit status-update
+  requests as authority, and stage Spike reclassification evidence correctly.
+- Marketplace-installed skills resolve their bundled validator relative to the
+  loaded skill without persisting an ephemeral plugin-cache path.
+- Flow sequences are rejected in scalar-only frontmatter fields and remain
+  supported only for documented EP relationship fields.
+- The optional Claude reviewer is tool-enforced read-only; deterministic
+  validator output must be supplied by its invoking agent.
+- Proposal filenames containing line breaks fail cleanly before newline-based
+  Bash 3-compatible enumeration, without split paths or leaked tool errors.
+- Relationship values cannot expand as shell wildcards against ambient files,
+  Decision Log identifiers must be unique citation targets, and explicit
+  symlink proposal targets fail closed.
+
 ## [1.1.0] — 2026-09-01
 
 ### Added

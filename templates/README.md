@@ -2,7 +2,7 @@
 
 This directory holds **Enhancement Proposals** — numbered design
 records that capture the *what* and *why* of non-trivial changes to the
-project. See [EP-1](./0001-ep-purpose-and-guidelines.md) for the full
+project. See [EP-0001](./0001-ep-purpose-and-guidelines.md) for the full
 process, conventions, and lifecycle.
 
 ## When to write one
@@ -11,6 +11,19 @@ Write an EP if you're introducing a new public contract, touching a
 load-bearing invariant, reversing a prior decision, or answering a
 "should we do X or Y?" question that isn't obvious from the code. Skip
 it for bug fixes, dep bumps, and contained refactors.
+
+Before planning or implementing a project change, classify it as:
+
+- **Spike** — exploratory work that does not establish a durable contract.
+- **Bounded** — a localized, understood change that preserves contracts and
+  load-bearing invariants.
+- **Architectural** — a potential contract, invariant, cross-module,
+  permission, persistence, or lasting contributor-process change.
+
+Spikes and Bounded changes do not get EPs. Architectural changes first search
+this index for an existing decision, then use the criteria above to decide
+whether a new EP is warranted. If a Spike discovers an architectural boundary,
+reclassify before crossing it.
 
 ## How to write one
 
@@ -32,20 +45,21 @@ it for bug fixes, dep bumps, and contained refactors.
 
 - **Placeholder** — triage-approved idea with a reserved number and
   a problem statement + open questions. Not yet a worked design.
-  Low review bar to merge; the point is rapid capture. See EP-1
+  Low review bar to merge; the point is rapid capture. See EP-0001
   §"Placeholders."
 - **Draft** — author is iterating. Design space being actively
-  worked out. Content may change.
+  worked out. Content may change. Does not authorise implementation.
 - **Accepted** — approved for implementation (or, for Informational
-  EPs, approved as the canonical record). Content is append-only.
+  EPs, approved as the canonical record). Content is append-only;
+  approved implementation may begin.
 - **Partial** — one or more scoped slices have shipped, but the EP's
-  stated goals are not fully implemented.
-- **Implemented** — a Standards EP that has shipped. Required
+  stated goals are not fully implemented. Remaining accepted scope may
+  continue.
+- **Implemented** — all stated accepted goals have shipped. Required
   `implemented-in: vX.Y.Z` in frontmatter points at the release.
-- **Superseded** — replaced by a later EP. Frontmatter points forward
-  via `superseded-by`.
-- **Withdrawn** — author pulled it before acceptance.
-- **Rejected** — maintainers declined it. Kept for historical context.
+- **Superseded** — replaced by a later EP; follow `superseded-by`.
+- **Withdrawn** — author pulled it before acceptance; do not implement.
+- **Rejected** — maintainers declined it; do not implement.
 
 ## Types
 
@@ -72,7 +86,7 @@ history:
     note: Initial draft.
 ```
 
-Optional, added as relevant (see EP-1 for full semantics):
+Optional, added as relevant (see EP-0001 for full semantics):
 
 ```yaml
 updated: YYYY-MM-DD
@@ -93,7 +107,7 @@ value (`extended-by: [8]`), for tooling consistency.
 
 When a new EP records `extends` or `supersedes`, **the same PR must
 update the older EP's reciprocal `extended-by` or `superseded-by`
-field**. `requires` and `see-also` do not imply reciprocity. See EP-1
+field**. `requires` and `see-also` do not imply reciprocity. See EP-0001
 §"Updating EPs" for the full rule.
 
 ## Conventions

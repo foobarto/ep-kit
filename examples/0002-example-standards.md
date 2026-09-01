@@ -11,7 +11,7 @@ history:
     note: Initial draft — example Standards EP.
 ---
 
-# EP-2: Example — Standards EP (Proposed Change)
+# EP-0002: Example — Standards EP (Proposed Change)
 
 <!--
   This is an EXAMPLE Standards EP. It demonstrates the format,
@@ -177,6 +177,6 @@ Rollback: if the new format causes issues, a config flag
 
 ## Related
 
-- EP-1 — SQLite decision record (the config store that inspired this)
+- EP-0001 — SQLite decision record (the config store that inspired this)
 - [JSON Lines format](https://jsonlines.org/)
 - Project issue #87 — log aggregation feature request

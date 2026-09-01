@@ -2,7 +2,7 @@
 ep: 0000                          # replace with your number (next free)
 title: Short descriptive title     # ~60 chars max
 author: Your Name <you@example.com>
-status: Draft                      # Placeholder for early idea capture; Draft for active iteration (see EP-1)
+status: Draft                      # Placeholder for early idea capture; Draft for active iteration (see EP-0001)
 type: Standards                    # Standards | Informational | Process
 created: 2026-04-22
 history:
@@ -32,7 +32,7 @@ history:
     that change a decision go in a new EP that supersedes this one.
   - If this EP extends or supersedes an existing one, record `extends`
     or `supersedes` and update the reciprocal field on that EP in the
-    same PR (see EP-1 §"Updating EPs").
+    same PR (see EP-0001 §"Updating EPs").
 -->
 
 ## Problem

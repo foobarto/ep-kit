@@ -11,7 +11,7 @@ history:
     note: Initial draft — bootstraps the EP process itself, modelled after PEP-1.
 ---
 
-# EP-1: EP Purpose and Guidelines
+# EP-0001: EP Purpose and Guidelines
 
 ## What is an EP?
 
@@ -47,6 +47,26 @@ implementation PRs.
 
 ## When to write an EP
 
+First classify the work:
+
+- **Spike** — exploratory work whose purpose is to reduce uncertainty without
+  establishing a durable contract or production design.
+- **Bounded** — an understood, localized change that preserves public
+  contracts, load-bearing invariants, cross-component boundaries, permission
+  models, persistent formats, and accepted EPs.
+- **Architectural** — a potential change to one of those boundaries, a reversal
+  or extension of an earlier decision, a lasting contributor-process change,
+  or multi-module/milestone work needing a shared design contract.
+
+Spike and Bounded work do not need an EP. Hidden complexity can ratchet work
+upward; if a Spike or Bounded change crosses an Architectural boundary, stop
+and reclassify before proceeding.
+
+For Architectural work, search the index before creating anything. An Accepted
+or Partial EP is the authoritative design input for implementation; do not
+duplicate it in a second design-spec artifact. Placeholder and Draft EPs do not
+authorize implementation. If no EP governs the work, use the criteria below.
+
 **Write an EP when:**
 
 - The change introduces a new public contract (CLI flag, config schema,
@@ -69,6 +89,12 @@ implementation PRs.
 
 When in doubt, err toward writing one. A rejected EP is cheaper than a
 contested feature with no paper trail.
+
+After implementing an Accepted EP, compare delivered evidence with every goal
+and rollout obligation. Keep `Accepted` if no meaningful slice shipped, use
+`Partial` while any obligation remains, and use `Implemented` only when the
+whole contract shipped and the first satisfying release is known. Status
+changes append a history entry and update the index.
 
 ## Lifecycle
 
@@ -113,25 +139,59 @@ contested feature with no paper trail.
   §"Placeholders" below.
 - **Draft** — author is iterating. Expect edits. Safe to comment on
   and push back against. Design space is being actively worked out.
+  Does **not** authorise implementation.
 - **Accepted** — approved for implementation (or, for Informational
   EPs, approved as the canonical record). Content is now treated
   as append-only; substantive changes go in a companion EP that
-  supersedes this one.
+  supersedes this one. Approved implementation may begin subject to
+  the project's ordinary execution authority.
 - **Partial** — one or more scoped slices have shipped, but the EP's
   stated goals are not fully implemented. The remaining rollout stays
   explicit instead of being hidden behind an over-broad Implemented claim.
-- **Implemented** — the accepted design has shipped. Standards EPs add
-  `implemented-in:` naming the first release that satisfied the EP.
-- **Superseded** — a later EP has replaced this one. The frontmatter
-  gains `superseded-by: [<number>]`.
+  Remaining accepted scope may continue without a new proposal unless
+  implementation crosses a new decision boundary.
+- **Implemented** — all stated accepted goals and rollout obligations have
+  shipped. Standards EPs add `implemented-in:` naming the first release that
+  satisfied the EP.
+- **Superseded** — a later EP has replaced this one. Do not use it as the
+  current design; follow `superseded-by: [<number>]`.
 - **Withdrawn** — the author pulled it before acceptance. Kept in the
-  repo for historical reference.
+  repo for historical reference. Do not implement it as an approved design.
 - **Rejected** — the community/maintainers declined it. Kept for
-  historical reference.
+  historical reference. Do not implement it as an approved design.
+
+These statuses state what the proposal itself authorises. A project or user
+may separately grant a specific override for scoped work, including
+implementation, against an unaccepted proposal. Consumers must never infer
+such an override from an autonomy level, task assignment, or the mere existence
+of a Placeholder or Draft. An override does not make the proposal Accepted.
 
 The status transition that matters most is **Draft → Accepted**. Before
 that line, the document is a conversation. After it, the document is a
 contract.
+
+## Decisions discovered during implementation
+
+Implementation-local, reversible details can remain in the implementation
+record: a pull request, commit, work log, or optional session journal. They do
+not need to inflate the accepted architectural record.
+
+Pause at the decision boundary when implementation discovers a choice that:
+
+- changes a public API, CLI, configuration, or other external contract;
+- changes a persisted or on-disk representation;
+- changes a trust, permission, or security boundary;
+- changes a load-bearing invariant;
+- contradicts a decision in the governing Accepted or Partial EP;
+- materially constrains future implementations; or
+- deserves its own honest alternatives and rationale record.
+
+Do not silently treat such a choice as an implementation detail or rewrite the
+Accepted EP in place. Create an extending EP when the new decision builds on
+the accepted contract, or a superseding EP when it replaces or contradicts
+that contract. Implementation may resume after the new proposal reaches the
+status required by this lifecycle, unless a separate explicit override is
+granted under project policy.
 
 ## Placeholders
 
@@ -160,7 +220,7 @@ work of producing a full Draft.
   to be worked out. This is the load-bearing part of a Placeholder.
 - At least one or two decision log entries for the design choices
   that *are* already settled ("this will be data-driven," "this
-  supersedes EP-X," etc.). Missing entries are explicitly labelled
+  supersedes EP-NNNN," etc.). Missing entries are explicitly labelled
   "to be captured during the brainstorm that takes this EP to
   Draft."
 
@@ -195,10 +255,46 @@ the same number, the first merged wins; the other rebases and bumps.
 
 Reasoning: date-prefixed filenames avoid the collision but make
 citations awkward ("see EP-2026-04-17-provider-registry" vs "see
-EP-2"). Sequential wins on readability; the rebase cost is trivial at
+EP-0002"). Sequential wins on readability; the rebase cost is trivial at
 most project throughputs.
 
-EP-1 is this document, by convention. EP-2+ are content proposals.
+EP-0001 is this document, by convention. EP-0002+ are content proposals.
+
+## Stable citations
+
+External tools, commits, pull requests, work logs, and other EPs may cite the
+decision record using these canonical textual forms:
+
+- `EP-NNNN` — one proposal, zero-padded to four digits, for example
+  `EP-0007`.
+- `EP-NNNN D<N>` — one Decision Log entry in that proposal, for example
+  `EP-0007 D3`.
+
+The canonical citation namespace is always `EP`, independent of the
+configurable frontmatter number key. A project using `prefix=rfc` still emits
+`EP-0007` as the stable protocol citation. Validators may continue accepting
+legacy numeric, unpadded (`EP-7`), or custom-labelled relationship values for
+compatibility, but new machine output and cross-tool citations use the
+canonical forms above.
+
+### Machine-readable catalogue
+
+The configured validator exposes the same protocol without requiring consumers
+to parse YAML:
+
+```bash
+scripts/validate-eps.sh --catalogue-json docs/eps/
+```
+
+Catalogue version 1 adds a top-level `proposals` array to the ordinary
+validation JSON. Each entry contains `id`, `number`, `path`, `title`, `type`,
+`status`, `requires`, `extends`, `supersedes`, `superseded-by`, `extended-by`,
+`see-also`, and `implemented-in`. `path` is the filename relative to the
+configured EP directory, and relationship values are emitted as canonical
+`EP-NNNN` IDs. Consumers must require a zero exit status before trusting the
+catalogue; a non-zero result means the accompanying checks or diagnostics found
+an invalid proposal set. Ordinary `--json` remains validation-only for backward
+compatibility.
 
 ## File layout
 
@@ -258,6 +354,15 @@ All EP-reference fields use YAML lists (`[1, 3, 7]`) even when only
 one value is present (`[4]`) — makes tooling simpler and keeps the
 schema consistent.
 
+### Supported YAML subset
+
+EP frontmatter deliberately uses a small YAML subset: top-level `key: scalar`
+fields, scalar lists in inline or indented form for relationships, and the
+documented indented sequence of maps for `history`. Anchors, aliases, tags,
+flow mappings, block scalars, custom types, and arbitrary nesting are outside
+the format. Keeping this language fixed preserves the validator's
+zero-dependency contract; compatibility with general YAML is not implied.
+
 ### The `history` field
 
 `history` is a YAML list of mappings. Each entry records one state
@@ -277,7 +382,7 @@ edited or deleted.
   chiefly for `status: Implemented` entries.
 - `note:` — short human-readable context (one sentence). "Initial
   draft," "Approved after architecture review," "Shipped in v0.0.4,"
-  "Replaced by EP-42 due to X," etc.
+  "Replaced by EP-0042 due to X," etc.
 - `superseded-by: [N]` — when status flips to `Superseded`, record the
   replacing EP here. Mirrors the top-level `superseded-by:` field
   (they must agree).
@@ -302,7 +407,7 @@ history:
   - date: 2027-02-01
     status: Superseded
     superseded-by: [42]
-    note: Replaced by EP-42 which extends the design.
+    note: Replaced by EP-0042 which extends the design.
 ```
 
 **The rule: every status change appends a history entry.** Draft →
@@ -330,7 +435,7 @@ dated around YYYY-MM-DD" if the original timeline matters.
   layout, CLI, API, or user-visible behaviour. Most EPs are Standards.
 - **Informational** — documents a design rationale, captures historical
   context, or describes a convention. No implementation work implied.
-- **Process** — changes how contributors work. This EP (EP-1) is
+- **Process** — changes how contributors work. This EP (`EP-0001`) is
   Process. A future "how we version releases" or "how we handle
   security disclosures" would also be Process.
 
@@ -370,8 +475,8 @@ Every non-obvious choice gets an entry:
 ```
 
 Use **DX** (D1, D2, …) rather than hierarchical numbering. Easy to cite
-from later EPs: "EP-2 D6 says we split invocation from parsing, but
-EP-7 revisits this because…"
+from later EPs: "EP-0002 D6 says we split invocation from parsing, but
+EP-0007 revisits this because…"
 
 The decision log is append-only once the EP is Accepted. If a later
 conversation reverses a decision, the correct move is a new EP that
@@ -445,11 +550,11 @@ relationship; neither implies extension or reciprocal metadata.
 
 Examples:
 
-- **EP-8 extends EP-2.** EP-8's frontmatter lists `extends: [2]`; the
-  PR that adds EP-8 also updates EP-2's
+- **EP-0008 extends EP-0002.** EP-0008's frontmatter lists `extends: [2]`; the
+  PR that adds EP-0008 also updates EP-0002's
   frontmatter to include `extended-by: [..., 8]`.
-- **EP-12 supersedes EP-4.** EP-12's frontmatter has `supersedes:
-  [4]`; the PR updates EP-4 to set `superseded-by: [12]` and
+- **EP-0012 supersedes EP-0004.** EP-0012's frontmatter has `supersedes:
+  [4]`; the PR updates EP-0004 to set `superseded-by: [12]` and
   `status: Superseded`.
 
 Rationale: without this rule, forward-links rot immediately — nobody
@@ -462,7 +567,7 @@ checklist: "does this new/edited EP need to update any older ones?"
 ### Date-based numbering
 
 Considered `YYYY-MM-DD-topic` instead of `NNNN-topic`. Rejected because
-citations like "see EP-2" are noticeably shorter than "see
+citations like "see EP-0002" are noticeably shorter than "see
 EP-2026-04-17-provider-registry" and come up dozens of times in PRs,
 commit messages, and chat. Merge-conflict cost of sequential numbering
 is trivial at most project throughputs.
@@ -519,7 +624,7 @@ history.
 - **Why:** citations are cleaner and more common than filename
   collisions. See "Rejected alternatives" above.
 
-### D4. EP-1 is Process, authored as the bootstrap
+### D4. EP-0001 is Process, authored as the bootstrap
 
 - **Decided:** the first EP defines the EP process itself, mirroring
   PEP-1.
@@ -528,9 +633,21 @@ history.
 - **Why:** the process document needs the same treatment it prescribes
   for other proposals — versioned, superseded if changed, append-only.
   A plain README can be silently rewritten, losing the "what did the
-  process look like when EP-2 was accepted?" answer. EP-1 being
+  process look like when EP-0002 was accepted?" answer. EP-0001 being
   Process is the standard convention (PEP-1, Kubernetes KEP-1) for
   exactly this reason.
+
+### D5. Stable citations use an EP namespace
+
+- **Decided:** cross-tool citations use `EP-NNNN` for proposals and
+  `EP-NNNN D<N>` for Decision Log entries, independent of the configurable
+  frontmatter number key.
+- **Alternatives:** emit a configured label such as `RFC-0007`; expose only
+  raw numbers; require consumers to parse filenames or frontmatter.
+- **Why:** one fixed textual namespace gives humans and tools a durable
+  protocol while `prefix=` remains free to fit an existing document schema.
+  Accepting older input forms preserves compatibility without making new
+  consumers guess which label a project chose.
 
 ## References
 

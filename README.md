@@ -6,12 +6,15 @@ A reusable framework for capturing, reviewing, and tracking design decisions in 
 
 | File | Purpose |
 |------|---------|
-| `SKILL.md` | AI skill — guided Q&A workflow for creating new EPs |
-| `SKILL-VALIDATE.md` | AI skill — semantic review of existing EPs |
-| `validate.sh` | Shell script — deterministic mechanical checks (CI-friendly) |
+| `skills/ep-kit-governance/` | Agent Skill — project-change preflight, EP routing, and completion checkpoint |
+| `skills/ep-kit/` | Agent Skill — guided EP authoring plus the deterministic validator helper |
+| `skills/ep-kit-validate/` | Agent Skill — semantic review plus the human review checklist |
+| `validate.sh` | Repository entry point for the deterministic validator (CI-friendly) |
 | `install.sh` | One-command installer for scaffolding a project |
 | `tests/test.sh` | Regression suite for validator and installer behavior |
-| `CHECKLIST.md` | PR review checklist for EP quality gate |
+| `agents/ep-kit-reviewer.md` | Optional Claude plugin agent for independent, read-only EP review |
+| `.codex-plugin/`, `.claude-plugin/` | Native Codex and Claude plugin metadata |
+| `.agents/plugins/marketplace.json` | Codex marketplace catalogue |
 | `CHANGELOG.md` | EP Kit version history |
 | `templates/0000-template.md` | Skeleton for new EPs |
 | `templates/0001-ep-purpose-and-guidelines.md` | Process document (conventions, lifecycle, rules) |
@@ -25,11 +28,14 @@ A reusable framework for capturing, reviewing, and tracking design decisions in 
 
 ```bash
 # Scaffolds docs/eps/, vendors scripts/validate-eps.sh, and installs
-# discoverable ep-kit + ep-kit-validate skill folders.
-./install.sh --skill-dir .claude/skills/
+# discoverable skills under the cross-client .agents/skills/ convention.
+./install.sh
 
-# Custom EP directory
+# Custom EP directory and harness-specific skills root
 ./install.sh docs/rfcs/ --skill-dir .agents/skills/
+
+# Governance files only; do not install project-local skills
+./install.sh --no-skills
 
 # Dry run to preview
 ./install.sh --dry-run
@@ -55,9 +61,16 @@ The AI skill reads this to know where to write EPs. The validator accepts the di
 
 **Create a new EP:** Tell your AI assistant "new EP for X" — the skill triggers a guided Q&A and produces a well-formed proposal file.
 
+**Run the change preflight:** With the skills installed project-locally,
+`ep-kit-governance` is discoverable before project changes. Compatible agents
+can use it to classify work as Spike, Bounded, or Architectural, route only
+EP-worthy decisions into authoring, apply Draft/Accepted gates, and return
+after delivery to assess `Partial` versus `Implemented`. Activation remains
+model-driven, so use the behavioral evaluations when changing trigger wording.
+
 **Validate mechanically:** Run `scripts/validate-eps.sh` for deterministic checks: frontmatter syntax, file naming, catalogue drift, strong reciprocal links, decision log format, section presence, and shipped-release metadata. In the EP Kit checkout itself, run `./validate.sh examples/`.
 
-**Review semantically:** Tell your AI assistant "review EP-3" — the validation skill audits problem clarity, decision log honesty, scope discipline, and internal consistency.
+**Review semantically:** Tell your AI assistant "review EP-0003" — the validation skill audits problem clarity, decision log honesty, scope discipline, and internal consistency.
 
 ## The two-layer validation model
 
@@ -82,7 +95,7 @@ EP Kit uses a two-layer approach:
                   │ (only if script passes)
                   ▼
 ┌─────────────────────────────────────┐
-│  SKILL-VALIDATE.md (semantic/AI)    │
+│  ep-kit-validate (semantic/AI)      │
 │  - Problem clarity and concreteness │
 │  - Goals alignment with problem     │
 │  - Non-goals quality                │
@@ -98,9 +111,48 @@ EP Kit uses a two-layer approach:
 
 The script is the gate — if it fails, don't bother the AI. The skill is the review — if the script passes but the EP is hollow, the skill catches it.
 
+## The activation layer
+
+EP Kit installs a separate governance skill so the authoring skill does not
+need to be invoked by name. Its discoverable trigger covers the start, resume,
+and completion of project changes in repositories containing `.ep-kit`.
+
+The preflight deliberately exits quickly for work that should not create an EP:
+
+| Class | Meaning | EP action |
+|-------|---------|-----------|
+| Spike | Exploratory work that reduces uncertainty without setting a durable contract | None; reclassify if it crosses a contract boundary |
+| Bounded | Localized, understood change that preserves contracts and invariants | None |
+| Architectural | Potentially durable contract, invariant, relationship, or process change | Search existing EPs, then create one only if EP-worthy |
+
+For EP-worthy Architectural work, the EP replaces a parallel design-spec
+artifact. Once Accepted, its path becomes the specification passed to whatever
+implementation-planning method the project uses. EP Kit does not prescribe
+TDD, worktrees, subagents, debugging, or plan format.
+
+After implementation, the same skill compares delivered evidence with the
+Accepted EP and recommends remaining `Accepted`, moving to `Partial`, or moving
+to `Implemented`. Lifecycle metadata changes still require explicit authority.
+
+### Lifecycle contract for consumers
+
+| Status | Implementation meaning |
+|--------|------------------------|
+| Placeholder | Does not authorise implementation |
+| Draft | Does not authorise implementation |
+| Accepted | Approved implementation may begin under ordinary project authority |
+| Partial | Some accepted scope shipped; remaining accepted scope may continue |
+| Implemented | All stated accepted goals and rollout obligations shipped |
+| Superseded | Follow the replacement proposal |
+| Withdrawn / Rejected | Do not implement as an approved design |
+
+A separate, explicit pre-acceptance override may authorise specific scoped
+work, including implementation, but the status itself never implies that
+override and the proposal remains unaccepted.
+
 ## How the creation skill works
 
-The `SKILL.md` runs a **6-phase Q&A workflow**:
+The `skills/ep-kit/SKILL.md` skill runs a **6-phase Q&A workflow**:
 
 1. **Scope & framing** — one sentence proposal, trigger, type, related EPs, non-goals, placeholder vs draft
 2. **Design** — adaptive depth on shape, interfaces, migration, failure modes, testing
@@ -123,7 +175,103 @@ The `SKILL.md` runs a **6-phase Q&A workflow**:
 - **Filename:** `NNNN-short-kebab-title.md` (sequential, 4-digit)
 - **Types:** Standards (changes code), Informational (documents decisions), Process (changes workflow)
 - **Decision log:** `D1`, `D2`, … numbering — easy to cite from later EPs
+- **Stable citations:** `EP-NNNN` for a proposal; `EP-NNNN D<N>` for one of
+  its Decision Log entries. These forms do not change with `prefix=`; existing
+  unpadded references remain accepted as legacy shorthand.
 - **Bootstrap carve-out:** in-place edits are fine before the EP is externally referenced; append-only after
+
+## Supported frontmatter subset
+
+The validator intentionally supports a constrained YAML subset, not arbitrary
+YAML. Frontmatter uses top-level `key: scalar` fields, inline or indented scalar
+lists for EP relationships, and the documented indented `history` sequence.
+Do not use anchors, aliases, tags, flow mappings, block scalars, or custom YAML
+types. This keeps validation zero-dependency and makes the accepted syntax a
+stable project contract instead of an accidentally growing parser surface.
+
+## Machine-readable catalogue
+
+`validate.sh --catalogue-json <ep-directory>` runs the same deterministic
+validation and adds a versioned `proposals` array to the JSON result. Each
+entry includes the EP-directory-relative filename in `path`, number, canonical
+ID, title, type, status, relationship fields, and `implemented-in`. The
+existing `--json` shape remains unchanged.
+
+```bash
+scripts/validate-eps.sh --catalogue-json docs/eps/ > ep-catalogue.json
+jq '.proposals[] | {id, path, status, extends, "implemented-in": .["implemented-in"]}' ep-catalogue.json
+```
+
+Consumers must check the command's exit status before trusting the catalogue;
+a non-zero result means the accompanying validation diagnostics found an
+invalid proposal set. Catalogue version 1 always emits canonical `EP-NNNN`
+IDs even when `.ep-kit` configures another frontmatter number key.
+
+## Behavioral evaluations
+
+`evals/` contains pressure scenarios for the activation boundary: trivial bugs
+must avoid EP ceremony, public contracts must route into an EP, Draft EPs must
+block implementation, Accepted EPs must replace duplicate design specs, and
+completion must distinguish Partial from Implemented. These complement the
+deterministic regression suite in `tests/test.sh`.
+
+## Optional companion: Cairn
+
+[Cairn](https://github.com/foobarto/cairn) complements EP Kit without being a
+dependency. EP Kit manages the life of a durable decision; Cairn manages the
+life of implementation work and sessions. When both are present:
+
+- ideas or implementation discoveries may first surface in a Cairn work log;
+- architectural decisions are promoted into EP Kit;
+- Accepted or Partial EPs may be decomposed into Cairn execution tasks;
+- Cairn may cite `EP-NNNN` and `EP-NNNN D<N>`;
+- discoveries that invalidate an accepted decision return to EP Kit as an
+  extending or superseding proposal; and
+- Cairn's close or Ship workflow may invoke EP Kit's completion checkpoint to
+  reconcile `Accepted`, `Partial`, and `Implemented` under existing authority.
+
+EP Kit does not read or write Cairn journals, punch lists, profiles, autonomy
+settings, plans, review orchestration, or Ship state. Neither project installs,
+imports, or controls the other; the integration is only the textual citation
+and lifecycle protocol above.
+
+## Agent Skills and plugin installation
+
+The repository and the installer's output follow the
+[Agent Skills specification](https://agentskills.io/specification): each skill
+is a directory whose `SKILL.md` has a matching lowercase name and a discovery
+description. Installing under `.agents/skills/` uses the documented
+cross-client convention and is the generic path for compatible agents.
+
+For native marketplace installation:
+
+```bash
+# Codex
+codex plugin marketplace add foobarto/ep-kit
+codex plugin add ep-kit@ep-kit
+
+# Claude Code
+claude plugin marketplace add foobarto/ep-kit
+claude plugin install ep-kit@ep-kit
+```
+
+Marketplace installation delivers agent behavior; it does not scaffold a
+target repository. Initialize that repository with `./install.sh --no-skills`
+from an EP Kit checkout so it receives `.ep-kit`, EP-0001, templates, and the
+project validator without duplicating the globally installed skill IDs. Use
+plain `./install.sh` instead when repository-vendored, version-pinned skills
+are preferred; no marketplace install is needed in that model.
+
+Claude also discovers the optional `ep-kit-reviewer` agent. It provides an
+independent, read-only semantic and implementation-status review; it is not an
+activation hook and EP Kit does not require subagents. Codex and other Agent
+Skills clients receive the same three core skills without depending on that
+Claude-specific agent surface.
+
+For another compatible harness, use `./install.sh --skill-dir <skills-root>`.
+The default `.agents/skills/` path is the portable option; a native plugin
+manifest is deliberately included only where its current format can be
+validated rather than guessed.
 
 ## License
 

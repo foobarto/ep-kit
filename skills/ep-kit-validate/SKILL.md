@@ -1,6 +1,6 @@
 ---
 name: ep-kit-validate
-description: Use when the user wants to review or validate an existing Enhancement Proposal for semantic quality. Triggers on phrases like "review this EP", "validate EP-3", "is this EP good?", "check EP quality", "EP review". Performs a thorough semantic audit covering problem clarity, decision log honesty, scope correctness, alternative quality, and internal consistency.
+description: Use when the user wants to review or validate an existing Enhancement Proposal for semantic quality. Triggers on phrases like "review this EP", "validate EP-0003", "is this EP good?", "check EP quality", "EP review". Performs a thorough semantic audit covering problem clarity, decision log honesty, scope correctness, alternative quality, and internal consistency.
 ---
 
 # EP Kit: Validate an EP
@@ -12,7 +12,7 @@ decision logs that no script can detect.
 
 ## When to use this skill
 
-- User asks to "review this EP", "validate EP-N", "is this EP ready?"
+- User asks to "review this EP", "validate EP-NNNN", "is this EP ready?"
 - User wants a second opinion before submitting an EP PR.
 - User is reviewing someone else's EP and wants structured feedback.
 - After `validate.sh` passes — the script catches syntax, this catches
@@ -38,16 +38,18 @@ and other EPs.
 
 Resolve `<validator>` from `validator=` in the same `.ep-kit` file,
 relative to that file's directory. If it is absent, try
-`scripts/validate-eps.sh`, `.agents/skills/ep-kit/validate.sh`, then
-`.claude/skills/ep-kit/validate.sh`. If none exists, report that the
-mechanical gate is unavailable instead of inventing a command.
+`../ep-kit/validate.sh` relative to this loaded skill directory (the bundled
+plugin helper), `scripts/validate-eps.sh`, `.agents/skills/ep-kit/validate.sh`,
+then `.claude/skills/ep-kit/validate.sh`. Never persist a plugin cache path in
+`.ep-kit`. If none exists, report that the mechanical gate is unavailable
+instead of inventing a command.
 
 ## Prerequisites
 
 1. **Run `<validator>` first.** If the mechanical checks fail, fix those
    before doing semantic review. No point reviewing an EP with broken
    frontmatter.
-2. **Read EP-1** for the project's conventions. `<ep_dir>/0001-ep-purpose-and-guidelines.md`
+2. **Read EP-0001** for the project's conventions. `<ep_dir>/0001-ep-purpose-and-guidelines.md`
    is the authority.
 3. **Read the EP being reviewed** in full.
 4. **Read any referenced EPs** (requires, extends, supersedes, see-also) for
@@ -231,17 +233,17 @@ produce a consolidated report:
 
 | EP | Title | Verdict | Key issue |
 |----|-------|---------|-----------|
-| EP-3 | ... | Pass | — |
-| EP-5 | ... | Revise | Missing failure modes |
-| EP-7 | ... | Reject | Scope covers 3 decision spaces |
+| EP-0003 | ... | Pass | — |
+| EP-0005 | ... | Revise | Missing failure modes |
+| EP-0007 | ... | Reject | Scope covers 3 decision spaces |
 
 ## Per-EP details
 
-### EP-5 — Title
+### EP-0005 — Title
 
 [Full review output]
 
-### EP-7 — Title
+### EP-0007 — Title
 
 [Full review output]
 ```

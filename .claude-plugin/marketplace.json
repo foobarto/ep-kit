@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "ep-kit",
+  "version": "1.2.0",
+  "description": "EP Kit skills and review agent for architecture decision governance.",
+  "owner": {
+    "name": "Bartosz Ptaszynski",
+    "email": "bartosz@foobarto.me"
+  },
+  "plugins": [
+    {
+      "name": "ep-kit",
+      "description": "Classify changes, govern Enhancement Proposals, and preserve architecture decisions over time.",
+      "source": "./",
+      "version": "1.2.0",
+      "author": {
+        "name": "Bartosz Ptaszynski",
+        "email": "bartosz@foobarto.me"
+      },
+      "homepage": "https://github.com/foobarto/ep-kit",
+      "repository": "https://github.com/foobarto/ep-kit",
+      "license": "MIT OR Apache-2.0",
+      "category": "development",
+      "tags": [
+        "architecture",
+        "decision-records",
+        "enhancement-proposals",
+        "agent-skills"
+      ],
+      "strict": true
+    }
+  ]
+}

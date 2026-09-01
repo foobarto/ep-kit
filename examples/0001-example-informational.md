@@ -14,7 +14,7 @@ history:
     note: Accepted as the canonical example for the EP Kit.
 ---
 
-# EP-1: Example — Informational EP (Decision Record)
+# EP-0001: Example — Informational EP (Decision Record)
 
 <!--
   This is an EXAMPLE Informational EP. It demonstrates the format,
