@@ -1,6 +1,5 @@
 ---
 name: ep-kit-validate
-version: 1.0.0
 description: Use when the user wants to review or validate an existing Enhancement Proposal for semantic quality. Triggers on phrases like "review this EP", "validate EP-3", "is this EP good?", "check EP quality", "EP review". Performs a thorough semantic audit covering problem clarity, decision log honesty, scope correctness, alternative quality, and internal consistency.
 ---
 
@@ -37,15 +36,21 @@ Resolve the EP directory using the same logic as the `ep-kit` skill:
 Use the resolved `<ep_dir>` to locate `<ep_dir>/0001-ep-purpose-and-guidelines.md`
 and other EPs.
 
+Resolve `<validator>` from `validator=` in the same `.ep-kit` file,
+relative to that file's directory. If it is absent, try
+`scripts/validate-eps.sh`, `.agents/skills/ep-kit/validate.sh`, then
+`.claude/skills/ep-kit/validate.sh`. If none exists, report that the
+mechanical gate is unavailable instead of inventing a command.
+
 ## Prerequisites
 
-1. **Run `validate.sh` first.** If the mechanical checks fail, fix those
+1. **Run `<validator>` first.** If the mechanical checks fail, fix those
    before doing semantic review. No point reviewing an EP with broken
    frontmatter.
 2. **Read EP-1** for the project's conventions. `<ep_dir>/0001-ep-purpose-and-guidelines.md`
    is the authority.
 3. **Read the EP being reviewed** in full.
-4. **Read any referenced EPs** (requires, supersedes, see-also) for
+4. **Read any referenced EPs** (requires, extends, supersedes, see-also) for
    context.
 
 ## Review dimensions

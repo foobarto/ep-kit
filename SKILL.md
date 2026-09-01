@@ -1,6 +1,5 @@
 ---
 name: ep-kit
-version: 1.0.0
 description: Use when the user wants to create a new EP (Enhancement Proposal) — a design document describing a proposed change to the project. Triggers on phrases like "new EP", "write an EP", "propose X as an EP", "document this decision as an EP". Guides the user through a structured Q&A to produce a well-formed EP file with correct frontmatter, numbering, and the required sections including a decision log. Also handles superseding or extending existing EPs with bidirectional-link updates.
 ---
 
@@ -48,6 +47,7 @@ Path to `validate.sh`. Resolve in this order:
    `validator=<path>`, use that path.
 2. **Auto-discovery** — search for `validate.sh` in these locations
    (first match wins):
+   - `scripts/validate-eps.sh` (default vendored installation)
    - `<ep_dir>/../../validate.sh` (ep-kit installed as sibling)
    - `<ep_dir>/../validate.sh` (ep-kit installed as parent)
    - `.agents/skills/ep-kit/validate.sh` (skill directory)
@@ -70,9 +70,9 @@ and lines starting with `#` are ignored. Supported keys:
 ```
 dir=docs/eps               # EP directory (relative to config file)
 prefix=ep                  # frontmatter field name (default: ep)
-validator=./validate.sh    # path to validate.sh
+validator=scripts/validate-eps.sh  # path relative to the config file
 skip_sections=1            # skip required section checks (for retrofits)
-kit_version=1.0.0          # ep-kit version this config was generated for
+kit_version=1.1.0          # ep-kit version this config was generated for
 ```
 
 ## Setup check
@@ -151,8 +151,9 @@ flag — EPs are for load-bearing decisions.
 - List any related EPs by number. If one is being superseded, its
   frontmatter must be updated in the same PR (see EP-1 "Updating
   EPs" section).
-- If it extends one, add a `requires: [N]` entry and be ready to
-  update that EP's `extended-by` field.
+- If it extends one, add `extends: [N]` and be ready to update that
+  EP's reciprocal `extended-by` field. Use `requires` only when the
+  earlier EP is a must-read dependency; it does not imply extension.
 
 **Q5: What's explicitly NOT in scope?** This matters. EPs sprawl
 without firm non-goals. Ask the user to list 2–4 things this proposal
@@ -249,14 +250,14 @@ Once the Q&A is complete:
    skeleton. Rename to `<ep_dir>/NNNN-short-kebab-title.md`.
 3. **Fill in the frontmatter** — `<prefix>`, `title`, `author`,
    `status: Draft`, `type`, `created` (today's date), and relevant
-   optional fields (`requires`, `supersedes`, `see-also`). Fields
+   optional fields (`requires`, `extends`, `supersedes`, `see-also`). Fields
    like `discussion-at` and `implemented-in` are filled later when
    the EP moves to Accepted or Implemented status.
 4. **Initialize the `history` field** with one entry for the Draft
    state. Date is today. Status is `Draft`. Note should be concise —
    "Initial draft" or "Retrofitted from pre-EP notes" for retrofits.
-   Every subsequent status change (Draft→Accepted, Accepted→
-   Implemented, etc.) appends a new entry in the PR that changes the
+   Every subsequent status change (Draft→Accepted, Accepted→Partial,
+   Partial→Implemented, etc.) appends a new entry in the PR that changes the
    status. Never edit or delete history entries.
 5. **Write the content** drawing on the Q&A answers. Scale each
    section to its complexity — short is fine. Kill placeholders.
@@ -277,14 +278,16 @@ Once the Q&A is complete:
    **When extending EP-N:**
    - On the *old* EP: add M to `extended-by: [...]` (preserve
      existing entries, don't overwrite)
-   - On the *new* EP: add `requires: [N]` or `see-also: [N]`
+   - On the *new* EP: add `extends: [N]`
 
 ### Phase 5 — Validation (hard gate + semantic review)
 
 #### Step 5a: Mechanical validation (hard gate)
 
-Run the validator script on the new EP file. You know the file path
-from Phase 4 step 2 (use the actual filename you created). If the
+Run the validator script on the entire `<ep_dir>`. Directory mode is the
+hard gate because it also checks the README catalogue, duplicate numbers,
+and every reciprocal file changed in Phase 4. You may validate the new file
+alone for fast feedback, but do not treat that as the final pass. If the
 `.ep-kit` config has `skip_sections=1`, pass `--skip-sections` to
 the validator. If you want structured output (e.g. for CI), pass
 `--json`.
@@ -298,8 +301,8 @@ If the validator exits non-zero:
 
 Do not hand off an EP that fails mechanical validation. The validator
 catches: frontmatter syntax, field presence, enum values, filename
-number matching, decision log format, bidirectional link consistency,
-and cross-reference resolution.
+number matching, decision log format, catalogue consistency, strong-link
+reciprocity, Implemented release metadata, and cross-reference resolution.
 
 If no validator is available (see Configuration resolution), skip
 this step and note it in the handoff.
@@ -319,8 +322,9 @@ the script can't check:
   isn't captured — push the user for it.
 - **Frontmatter completeness.** All required fields filled. Numbers
   used in `requires` / `supersedes` / etc. correspond to real EPs.
-- **Bidirectional links.** If this EP references another, does the
-  other EP's frontmatter need updating? If so, do it now.
+- **Relationship semantics.** `extends` and `supersedes` need reciprocal
+  metadata; `requires` and `see-also` do not. Confirm each field describes
+  the real relationship.
 
 Fix inline. No need to ask the user for permission to clean up
 mechanical issues — just fix and note them in the handoff.
@@ -352,7 +356,7 @@ typically reviewed before landing.
   stamp.
 - **Always write a decision log.** Non-negotiable for Standards EPs.
 - **Always update the README index** when creating a new EP.
-- **Always update linked EPs' frontmatter** when extending or
+- **Always update linked EPs' reciprocal frontmatter** when extending or
   superseding — same session, not "I'll do it later."
 - **Use today's date** for `created:`. Check the current date before
   writing the file (the harness exposes this via the system reminder;
@@ -379,4 +383,4 @@ typically reviewed before landing.
 - **Template:** `<ep_dir>/0000-template.md`
 - **Index:** `<ep_dir>/README.md`
 - **Validator:** `<validator>` (mechanical checks — hard gate in Phase 5; supports `--json` for CI, `--skip-sections` for retrofits)
-- **Review skill:** `SKILL-VALIDATE.md` (semantic review — post-creation audit)
+- **Review skill:** `ep-kit-validate` (semantic review — post-creation audit)

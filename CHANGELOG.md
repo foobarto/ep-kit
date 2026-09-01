@@ -2,6 +2,68 @@
 
 All notable changes to the EP Kit itself.
 
+## [1.1.0] — 2026-09-01
+
+### Added
+
+- `Partial` lifecycle status for proposals with shipped slices and open goals.
+- Explicit `extends` / `extended-by` reciprocity, separate from `requires`.
+- README index validation against proposal number, title, link, type, and status.
+- Support for both numeric references and quoted canonical labels such as
+  `"EP-0001"`.
+- Regression coverage for JSON output, malformed references, reciprocal links,
+  catalogue drift, duplicate numbers, and installer layout.
+
+### Changed
+
+- The installer now vendors the validator at a project-relative path instead
+  of recording the installer's absolute path.
+- `install.sh --upgrade-tools` refreshes managed validators and skills plus the
+  two managed config keys without overwriting project EP templates.
+- `--skill-dir` now creates discoverable `ep-kit/` and `ep-kit-validate/`
+  skill folders.
+- Implemented Standards EPs must name their first shipped release with
+  `implemented-in`.
+- Process EPs may use process-specific structure rather than the Standards and
+  Informational section set.
+- Decision-log scanning no longer starts three subprocesses per input line,
+  keeping large catalogues practical to validate.
+
+### Fixed
+
+- Removed duplicated unreachable shell text that made `bash -n validate.sh`
+  fail in the v1.0.0 release.
+- `--json` now emits valid JSON for multiple files and global diagnostics.
+- `requires` no longer incorrectly implies an `extended-by` backlink.
+- The valid `Placeholder` lifecycle name no longer triggers unresolved-marker
+  warnings; legacy `requires` / `extended-by` pairs pass with a migration
+  warning.
+- Removed the unsupported `version` key from skill frontmatter.
+- Zero-padded frontmatter numbers now compare correctly with zero-padded
+  filenames.
+- Malformed proposal numbers now produce validation errors without aborting
+  the validation run.
+- History entries now require their own valid date and lifecycle status.
+- The validator now honors `dir=` relative to a discovered `.ep-kit` file,
+  including when invoked from a nested project directory without a target.
+- Quoted scalar frontmatter is normalized for index checks, duplicate index
+  rows are rejected, and early parse failures count as checked files.
+- Filenames now enforce the documented lowercase kebab-case convention.
+- Quoted scalar values with inline comments are normalized, supersession
+  history must mirror top-level metadata, and JSON diagnostics escape control
+  characters.
+- Legacy scalar `superseded-by` remains accepted with a migration warning.
+- Installer argument parsing now rejects a second positional target even when
+  the first is the default path.
+- Missing installer option values and validator paths outside the target
+  project are rejected before writes begin.
+- Migration guidance now installs the complete kit rather than piping the
+  standalone installer without its required sibling files.
+- Quoted history scalars and escaped quotes in scalar frontmatter are
+  normalized consistently; the index template now documents required history.
+- Large EP bodies no longer produce false missing-section errors from
+  `grep -q`/`pipefail` SIGPIPE interactions.
+
 ## [1.0.0] — 2026-04-30
 
 First stable release. The schema, skill workflow, and validator

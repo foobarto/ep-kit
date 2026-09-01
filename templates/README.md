@@ -24,7 +24,7 @@ it for bug fixes, dep bumps, and contained refactors.
 
 | #    | Title | Type | Status |
 |------|-------|------|--------|
-| 0001 | [EP Purpose and Guidelines](./0001-ep-purpose-and-guidelines.md) | Process | Accepted |
+| 0001 | [EP Purpose and Guidelines](./0001-ep-purpose-and-guidelines.md) | Process | Draft |
 
 <!-- Add new entries in numerical order. Keep the table tidy. -->
 
@@ -38,7 +38,9 @@ it for bug fixes, dep bumps, and contained refactors.
   worked out. Content may change.
 - **Accepted** — approved for implementation (or, for Informational
   EPs, approved as the canonical record). Content is append-only.
-- **Implemented** — a Standards EP that has shipped. Optional
+- **Partial** — one or more scoped slices have shipped, but the EP's
+  stated goals are not fully implemented.
+- **Implemented** — a Standards EP that has shipped. Required
   `implemented-in: vX.Y.Z` in frontmatter points at the release.
 - **Superseded** — replaced by a later EP. Frontmatter points forward
   via `superseded-by`.
@@ -61,9 +63,13 @@ Required:
 ep: N
 title: Short, descriptive title
 author: Name <email@example.com>
-status: Placeholder | Draft | Accepted | Implemented | Superseded | Withdrawn | Rejected
+status: Placeholder | Draft | Accepted | Partial | Implemented | Superseded | Withdrawn | Rejected
 type: Standards | Informational | Process
 created: YYYY-MM-DD
+history:
+  - date: YYYY-MM-DD
+    status: Draft
+    note: Initial draft.
 ```
 
 Optional, added as relevant (see EP-1 for full semantics):
@@ -71,8 +77,9 @@ Optional, added as relevant (see EP-1 for full semantics):
 ```yaml
 updated: YYYY-MM-DD
 requires: [N, M]          # must-read-first dependencies
+extends: [N]              # this EP builds directly on these
 supersedes: [N]           # this EP replaces these
-superseded-by: N          # this EP has been replaced
+superseded-by: [N]        # this EP has been replaced
 extended-by: [N, M]       # later EPs build on this one
 see-also: [N, M]          # loosely related
 implemented-in: vX.Y.Z
@@ -84,9 +91,10 @@ value (`extended-by: [8]`), for tooling consistency.
 
 ## Bidirectional links
 
-When a new EP extends or supersedes an older one, **the same PR must
-update the older EP's frontmatter** so navigation works in both
-directions. See EP-1 §"Updating EPs" for the full rule.
+When a new EP records `extends` or `supersedes`, **the same PR must
+update the older EP's reciprocal `extended-by` or `superseded-by`
+field**. `requires` and `see-also` do not imply reciprocity. See EP-1
+§"Updating EPs" for the full rule.
 
 ## Conventions
 

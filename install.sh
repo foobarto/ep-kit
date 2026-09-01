@@ -4,19 +4,24 @@
 # Usage:
 #   ./install.sh                  # uses default docs/eps/ directory
 #   ./install.sh docs/rfcs/       # custom directory
-#   ./install.sh --skill-dir .claude/skills/  # also copy SKILL.md
+#   ./install.sh --skill-dir .claude/skills/  # also install both skills
 #
 # Options:
-#   --skill-dir <path>   Copy SKILL.md to this directory (optional)
-#   --dry-run            Print what would be done without doing it
-#   --help               Show this help
+#   --skill-dir <path>       Install discoverable skills below this root
+#   --validator-path <path>  Vendored validator path (default: scripts/validate-eps.sh)
+#   --upgrade-tools          Refresh managed validator/skill files and config keys
+#   --dry-run                Print what would be done without doing it
+#   --help                   Show this help
 
 set -euo pipefail
 
 # Defaults
 EPS_DIR="docs/eps"
+EPS_DIR_SET=false
 SKILL_DIR=""
+VALIDATOR_PATH="scripts/validate-eps.sh"
 DRY_RUN=false
+UPDATE_TOOLS=false
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 usage() {
@@ -34,12 +39,36 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN=true
             shift
             ;;
+        --upgrade-tools)
+            UPDATE_TOOLS=true
+            shift
+            ;;
         --skill-dir)
+            if [[ $# -lt 2 || "$2" == -* ]]; then
+                echo "Error: --skill-dir requires a path" >&2
+                exit 1
+            fi
             SKILL_DIR="$2"
             shift 2
             ;;
         --skill-dir=*)
             SKILL_DIR="${1#--skill-dir=}"
+            if [[ -z "$SKILL_DIR" ]]; then
+                echo "Error: --skill-dir requires a path" >&2
+                exit 1
+            fi
+            shift
+            ;;
+        --validator-path)
+            if [[ $# -lt 2 || "$2" == -* ]]; then
+                echo "Error: --validator-path requires a path" >&2
+                exit 1
+            fi
+            VALIDATOR_PATH="$2"
+            shift 2
+            ;;
+        --validator-path=*)
+            VALIDATOR_PATH="${1#--validator-path=}"
             shift
             ;;
         -*)
@@ -48,8 +77,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             # First positional arg is the EP directory
-            if [[ "$EPS_DIR" == "docs/eps" ]]; then
+            if ! $EPS_DIR_SET; then
                 EPS_DIR="$1"
+                EPS_DIR_SET=true
             else
                 echo "Error: multiple positional arguments. Use --skill-dir for the skill target." >&2
                 exit 1
@@ -58,6 +88,15 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+if [[ -z "$VALIDATOR_PATH" ]]; then
+    echo "Error: --validator-path must not be empty" >&2
+    exit 1
+fi
+if [[ "$VALIDATOR_PATH" = /* || "$VALIDATOR_PATH" == ".." || "$VALIDATOR_PATH" == ../* || "$VALIDATOR_PATH" == */../* || "$VALIDATOR_PATH" == */.. ]]; then
+    echo "Error: --validator-path must stay relative to the target project" >&2
+    exit 1
+fi
 
 run() {
     if $DRY_RUN; then
@@ -72,8 +111,9 @@ echo "================"
 echo ""
 echo "EP directory:  $EPS_DIR"
 if [[ -n "$SKILL_DIR" ]]; then
-    echo "Skill directory: $SKILL_DIR"
+    echo "Skills root:    $SKILL_DIR"
 fi
+echo "Validator:      $VALIDATOR_PATH"
 if $DRY_RUN; then
     echo "Mode:          dry-run"
 fi
@@ -97,6 +137,26 @@ for f in 0000-template.md 0001-ep-purpose-and-guidelines.md README.md; do
     fi
 done
 
+# Vendor the validator into the target project. A relative, project-owned path
+# remains usable after the checkout or temporary directory containing this
+# installer is removed.
+VALIDATOR_DIR=$(dirname "$VALIDATOR_PATH")
+if [[ ! -d "$VALIDATOR_DIR" ]]; then
+    echo "Creating $VALIDATOR_DIR/"
+    run mkdir -p "$VALIDATOR_DIR"
+fi
+if [[ -f "$VALIDATOR_PATH" ]] && ! $UPDATE_TOOLS; then
+    echo "$VALIDATOR_PATH already exists — skipping"
+else
+    if [[ -e "$VALIDATOR_PATH" && "$SCRIPT_DIR/validate.sh" -ef "$VALIDATOR_PATH" ]]; then
+        echo "$VALIDATOR_PATH is the source validator — keeping it"
+    else
+        echo "Copying validate.sh → $VALIDATOR_PATH"
+        run cp "$SCRIPT_DIR/validate.sh" "$VALIDATOR_PATH"
+    fi
+fi
+run chmod +x "$VALIDATOR_PATH"
+
 # Copy skills if requested
 if [[ -n "$SKILL_DIR" ]]; then
     if [[ ! -d "$SKILL_DIR" ]]; then
@@ -104,35 +164,76 @@ if [[ -n "$SKILL_DIR" ]]; then
         run mkdir -p "$SKILL_DIR"
     fi
 
-    # Main creation skill
-    if [[ -f "$SKILL_DIR/SKILL.md" ]]; then
-        echo "$SKILL_DIR/SKILL.md already exists — skipping"
+    CREATE_SKILL_DIR="$SKILL_DIR/ep-kit"
+    VALIDATE_SKILL_DIR="$SKILL_DIR/ep-kit-validate"
+    for skill_path in "$CREATE_SKILL_DIR" "$VALIDATE_SKILL_DIR"; do
+        if [[ ! -d "$skill_path" ]]; then
+            echo "Creating $skill_path/"
+            run mkdir -p "$skill_path"
+        fi
+    done
+
+    # Main creation skill and its deterministic validator helper.
+    if [[ -f "$CREATE_SKILL_DIR/SKILL.md" ]] && ! $UPDATE_TOOLS; then
+        echo "$CREATE_SKILL_DIR/SKILL.md already exists — skipping"
     else
-        echo "Copying SKILL.md → $SKILL_DIR/SKILL.md"
-        run cp "$SCRIPT_DIR/SKILL.md" "$SKILL_DIR/SKILL.md"
+        echo "Copying SKILL.md → $CREATE_SKILL_DIR/SKILL.md"
+        run cp "$SCRIPT_DIR/SKILL.md" "$CREATE_SKILL_DIR/SKILL.md"
     fi
+    if [[ -f "$CREATE_SKILL_DIR/validate.sh" ]] && ! $UPDATE_TOOLS; then
+        echo "$CREATE_SKILL_DIR/validate.sh already exists — skipping"
+    else
+        echo "Copying validate.sh → $CREATE_SKILL_DIR/validate.sh"
+        run cp "$SCRIPT_DIR/validate.sh" "$CREATE_SKILL_DIR/validate.sh"
+    fi
+    run chmod +x "$CREATE_SKILL_DIR/validate.sh"
 
     # Validation review skill
-    if [[ -f "$SKILL_DIR/SKILL-VALIDATE.md" ]]; then
-        echo "$SKILL_DIR/SKILL-VALIDATE.md already exists — skipping"
+    if [[ -f "$VALIDATE_SKILL_DIR/SKILL.md" ]] && ! $UPDATE_TOOLS; then
+        echo "$VALIDATE_SKILL_DIR/SKILL.md already exists — skipping"
     else
-        echo "Copying SKILL-VALIDATE.md → $SKILL_DIR/SKILL-VALIDATE.md"
-        run cp "$SCRIPT_DIR/SKILL-VALIDATE.md" "$SKILL_DIR/SKILL-VALIDATE.md"
+        echo "Copying SKILL-VALIDATE.md → $VALIDATE_SKILL_DIR/SKILL.md"
+        run cp "$SCRIPT_DIR/SKILL-VALIDATE.md" "$VALIDATE_SKILL_DIR/SKILL.md"
     fi
 
     # Review checklist
-    if [[ -f "$SKILL_DIR/CHECKLIST.md" ]]; then
-        echo "$SKILL_DIR/CHECKLIST.md already exists — skipping"
+    if [[ -f "$VALIDATE_SKILL_DIR/CHECKLIST.md" ]] && ! $UPDATE_TOOLS; then
+        echo "$VALIDATE_SKILL_DIR/CHECKLIST.md already exists — skipping"
     else
-        echo "Copying CHECKLIST.md → $SKILL_DIR/CHECKLIST.md"
-        run cp "$SCRIPT_DIR/CHECKLIST.md" "$SKILL_DIR/CHECKLIST.md"
+        echo "Copying CHECKLIST.md → $VALIDATE_SKILL_DIR/CHECKLIST.md"
+        run cp "$SCRIPT_DIR/CHECKLIST.md" "$VALIDATE_SKILL_DIR/CHECKLIST.md"
     fi
 fi
 
 # Create .ep-kit config if it doesn't exist
 CONFIG_FILE=".ep-kit"
 if [[ -f "$CONFIG_FILE" ]]; then
-    echo "$CONFIG_FILE already exists — skipping creation"
+    if $UPDATE_TOOLS; then
+        echo "Updating managed tool keys in $CONFIG_FILE"
+        if $DRY_RUN; then
+            echo "[dry-run] set validator=$VALIDATOR_PATH and kit_version=1.1.0 in $CONFIG_FILE"
+        else
+            update_config_key() {
+                local file="$1" key="$2" value="$3" temp
+                temp=$(mktemp "${file}.tmp.XXXXXX")
+                awk -v key="$key" -v value="$value" '
+                    $0 ~ "^[[:space:]]*" key "=" {
+                        if (!found) print key "=" value
+                        found = 1
+                        next
+                    }
+                    { print }
+                    END { if (!found) print key "=" value }
+                ' "$file" > "$temp"
+                chmod --reference="$file" "$temp"
+                mv "$temp" "$file"
+            }
+            update_config_key "$CONFIG_FILE" validator "$VALIDATOR_PATH"
+            update_config_key "$CONFIG_FILE" kit_version "1.1.0"
+        fi
+    else
+        echo "$CONFIG_FILE already exists — skipping creation"
+    fi
 else
     echo "Creating $CONFIG_FILE"
     if $DRY_RUN; then
@@ -140,12 +241,12 @@ else
     else
         cat > "$CONFIG_FILE" <<EOF
 # EP Kit configuration
-# See ep-kit/README.md for available keys
+# See the EP Kit README for available keys
 
 dir=$EPS_DIR
 prefix=ep
-validator=$SCRIPT_DIR/validate.sh
-kit_version=1.0.0
+validator=$VALIDATOR_PATH
+kit_version=1.1.0
 EOF
     fi
 fi

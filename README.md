@@ -10,6 +10,7 @@ A reusable framework for capturing, reviewing, and tracking design decisions in 
 | `SKILL-VALIDATE.md` | AI skill — semantic review of existing EPs |
 | `validate.sh` | Shell script — deterministic mechanical checks (CI-friendly) |
 | `install.sh` | One-command installer for scaffolding a project |
+| `tests/test.sh` | Regression suite for validator and installer behavior |
 | `CHECKLIST.md` | PR review checklist for EP quality gate |
 | `CHANGELOG.md` | EP Kit version history |
 | `templates/0000-template.md` | Skeleton for new EPs |
@@ -23,7 +24,8 @@ A reusable framework for capturing, reviewing, and tracking design decisions in 
 ### 1. Install into your project
 
 ```bash
-# Default: scaffolds docs/eps/ and copies the skill to .claude/skills/
+# Scaffolds docs/eps/, vendors scripts/validate-eps.sh, and installs
+# discoverable ep-kit + ep-kit-validate skill folders.
 ./install.sh --skill-dir .claude/skills/
 
 # Custom EP directory
@@ -31,14 +33,20 @@ A reusable framework for capturing, reviewing, and tracking design decisions in 
 
 # Dry run to preview
 ./install.sh --dry-run
+
+# Refresh an existing installation's managed tools without replacing EP docs
+./install.sh --upgrade-tools --skill-dir .agents/skills/
 ```
 
 ### 2. Configure (optional)
 
-If your EP directory isn't `docs/eps/`, create a `.ep-kit` file in your project root:
+The installer creates `.ep-kit` with project-relative paths. Edit it if you
+need a custom directory, prefix, or validator location:
 
 ```
 dir=docs/rfcs
+prefix=ep
+validator=scripts/validate-eps.sh
 ```
 
 The AI skill reads this to know where to write EPs. The validator accepts the directory as an argument.
@@ -47,7 +55,7 @@ The AI skill reads this to know where to write EPs. The validator accepts the di
 
 **Create a new EP:** Tell your AI assistant "new EP for X" — the skill triggers a guided Q&A and produces a well-formed proposal file.
 
-**Validate mechanically:** Run `./validate.sh` (or `./validate.sh docs/eps/`) for deterministic checks: frontmatter syntax, file naming, bidirectional links, decision log format, section presence.
+**Validate mechanically:** Run `scripts/validate-eps.sh` for deterministic checks: frontmatter syntax, file naming, catalogue drift, strong reciprocal links, decision log format, section presence, and shipped-release metadata. In the EP Kit checkout itself, run `./validate.sh examples/`.
 
 **Review semantically:** Tell your AI assistant "review EP-3" — the validation skill audits problem clarity, decision log honesty, scope discipline, and internal consistency.
 
@@ -63,7 +71,9 @@ EP Kit uses a two-layer approach:
 │  - Required fields present          │
 │  - Valid enum values (status/type)  │
 │  - Cross-file reference existence   │
-│  - Bidirectional link consistency   │
+│  - Strong-link reciprocity          │
+│  - README index consistency         │
+│  - Implemented release metadata     │
 │  - Decision log entry count         │
 │  - Section presence by type         │
 │  - Unresolved placeholder detection │
@@ -104,8 +114,8 @@ The `SKILL.md` runs a **6-phase Q&A workflow**:
 - **Chat history rots.** Commit messages are too short. Changelogs record *what*, not *why*.
 - **Append-only after acceptance.** Once approved, an EP is a contract — not a wiki page.
 - **Decision log is required.** Every non-obvious choice gets documented with alternatives and reasoning.
-- **Bidirectional links.** Forward-references (`extended-by`, `superseded-by`) are mandatory same-PR updates, so navigation never rots.
-- **Status lifecycle.** `Placeholder → Draft → Accepted → Implemented → Superseded` tells readers what they can rely on.
+- **Bidirectional links.** Strong relationships (`extends` / `extended-by`, `supersedes` / `superseded-by`) are mandatory same-PR updates, so navigation never rots.
+- **Status lifecycle.** `Placeholder → Draft → Accepted → Partial → Implemented → Superseded` distinguishes incomplete rollout from shipped contracts.
 - **Two-layer validation.** Mechanical checks in CI, semantic review by AI — both layers catch different failure modes.
 
 ## Conventions at a glance

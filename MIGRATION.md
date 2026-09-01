@@ -29,7 +29,7 @@ ADRs typically have "Context" and "Decision". Map these:
 Run the validator with `--skip-sections` during the transition to avoid blocking on missing sections:
 
 ```bash
-./validate.sh --skip-sections docs/eps/
+scripts/validate-eps.sh --skip-sections docs/eps/
 ```
 
 Then progressively fill in missing sections.
@@ -122,7 +122,7 @@ GEPs don't have a `type:` field. Add one:
 ### Step 4: Run validator
 
 ```bash
-./validate.sh docs/eps/
+scripts/validate-eps.sh docs/eps/
 ```
 
 Fix any errors (usually missing `type:` or section mismatches).
@@ -171,11 +171,12 @@ For each significant decision document:
 ### Step 3: Set up validation
 
 ```bash
-# Install EP Kit
-curl -fsSL https://raw.githubusercontent.com/foobarto/ep-kit/main/install.sh | bash
+# Install EP Kit (the installer needs its sibling templates and validator)
+git clone --depth 1 https://github.com/foobarto/ep-kit.git .tmp/ep-kit
+.tmp/ep-kit/install.sh
 
 # Validate
-./validate.sh docs/eps/
+scripts/validate-eps.sh docs/eps/
 ```
 
 ## Bulk Migration Script
@@ -254,14 +255,14 @@ EOF
 done
 
 echo "Migrated $((COUNTER - 1)) ADRs to $EP_DIR/"
-echo "Run: ./validate.sh --skip-sections $EP_DIR/"
+echo "Run: scripts/validate-eps.sh --skip-sections $EP_DIR/"
 ```
 
 ## Post-Migration Checklist
 
 - [ ] All EP files have valid frontmatter
-- [ ] `./validate.sh` passes (or `--skip-sections` is used during transition)
-- [ ] Bidirectional links (`requires` ↔ `extended-by`) are consistent
+- [ ] `scripts/validate-eps.sh` passes (or `--skip-sections` is used during transition)
+- [ ] Strong bidirectional links (`extends` ↔ `extended-by`, `supersedes` ↔ `superseded-by`) are consistent
 - [ ] Decision logs have at least one entry per EP
 - [ ] Superseded EPs have correct status
 - [ ] Team is trained on EP creation workflow

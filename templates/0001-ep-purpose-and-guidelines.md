@@ -91,6 +91,11 @@ contested feature with no paper trail.
           │
           ▼
      ┌───────────────┐
+     │    Partial    │   (optional; some slices shipped)
+     └───────┬───────┘
+             │
+             ▼
+     ┌───────────────┐
      │  Implemented  │
      └───────┬───────┘
              │
@@ -112,10 +117,13 @@ contested feature with no paper trail.
   EPs, approved as the canonical record). Content is now treated
   as append-only; substantive changes go in a companion EP that
   supersedes this one.
-- **Implemented** — the accepted design has shipped. Optional: add a
-  "Shipped in" line referencing a release tag or PR.
+- **Partial** — one or more scoped slices have shipped, but the EP's
+  stated goals are not fully implemented. The remaining rollout stays
+  explicit instead of being hidden behind an over-broad Implemented claim.
+- **Implemented** — the accepted design has shipped. Standards EPs add
+  `implemented-in:` naming the first release that satisfied the EP.
 - **Superseded** — a later EP has replaced this one. The frontmatter
-  gains `superseded-by: <number>`.
+  gains `superseded-by: [<number>]`.
 - **Withdrawn** — the author pulled it before acceptance. Kept in the
   repo for historical reference.
 - **Rejected** — the community/maintainers declined it. Kept for
@@ -233,14 +241,17 @@ Optional fields, added as they become relevant:
 - `updated: YYYY-MM-DD` — last substantive edit.
 - `requires: [N, M]` — EPs this one depends on (the reader should
   read those first for context).
-- `superseded-by: N` — this EP is replaced by another; readers should
+- `extends: [N, M]` — earlier EPs this one directly builds on without
+  replacing; reciprocal with `extended-by`.
+- `superseded-by: [N]` — this EP is replaced by another; readers should
   follow the link forward.
 - `supersedes: [N, M]` — this EP replaces prior EPs listed here.
 - `extended-by: [N, M]` — later EPs that build on this one without
   replacing it. Useful for forward navigation so a reader of this EP
   discovers follow-up work.
 - `see-also: [N, M]` — loosely related EPs, looser than `extended-by`.
-- `implemented-in: vX.Y.Z` — release where this first shipped.
+- `implemented-in: vX.Y.Z` — release where this first shipped; required
+  for Implemented Standards EPs.
 - `discussion-at: <URL>` — link to issue/PR where debate happened.
 
 All EP-reference fields use YAML lists (`[1, 3, 7]`) even when only
@@ -257,7 +268,8 @@ edited or deleted.
 
 - `date: YYYY-MM-DD` — when the transition happened.
 - `status:` — the status the EP moved *to* (`Placeholder`, `Draft`,
-  `Accepted`, `Implemented`, `Superseded`, `Withdrawn`, `Rejected`).
+  `Accepted`, `Partial`, `Implemented`, `Superseded`, `Withdrawn`,
+  `Rejected`).
 
 **Optional keys:**
 
@@ -266,7 +278,7 @@ edited or deleted.
 - `note:` — short human-readable context (one sentence). "Initial
   draft," "Approved after architecture review," "Shipped in v0.0.4,"
   "Replaced by EP-42 due to X," etc.
-- `superseded-by: N` — when status flips to `Superseded`, record the
+- `superseded-by: [N]` — when status flips to `Superseded`, record the
   replacing EP here. Mirrors the top-level `superseded-by:` field
   (they must agree).
 - `pr: <URL>` — link to the PR that landed this transition.
@@ -289,14 +301,16 @@ history:
     pr: https://github.com/example/project/pull/NNN
   - date: 2027-02-01
     status: Superseded
-    superseded-by: 42
+    superseded-by: [42]
     note: Replaced by EP-42 which extends the design.
 ```
 
 **The rule: every status change appends a history entry.** Draft →
-Accepted appends one. Accepted → Implemented appends one. Accepted →
-Superseded appends one (and also updates `superseded-by` at the top
-level). This happens in the same PR that changes the status.
+Accepted appends one. Accepted → Partial and Partial → Implemented each
+append one when phased delivery uses that state. Accepted → Implemented
+may still happen directly. Supersession appends one and also updates
+`superseded-by` at the top level. This happens in the same PR that
+changes the status.
 
 **Why both top-level `status` and `history`:** the top-level is
 ergonomic — one field tells you the current state. `history` is the
@@ -400,7 +414,8 @@ the first few days of the EP process, it's looser.
 5. When consensus is reached, update `status: Accepted` and merge.
 6. Open implementation PRs that reference the EP number in their
    descriptions.
-7. When shipped, update `status: Implemented` and optionally add
+7. Use `status: Partial` while only scoped slices have shipped. When
+   the full design ships, update `status: Implemented` and add
    `implemented-in:`.
 
 ## Process for withdrawing, superseding, or rejecting
@@ -409,7 +424,7 @@ the first few days of the EP process, it's looser.
   history entry noting the reason, and adds a short paragraph at the
   top of the document explaining why. The EP stays in the repo.
 - **Supersede:** the replacing EP's frontmatter has `supersedes: [N]`;
-  the replaced EP's frontmatter gains `superseded-by: M`,
+  the replaced EP's frontmatter gains `superseded-by: [M]`,
   `status: Superseded`, and a new history entry. Both stay in the repo.
 - **Reject:** a maintainer updates `status: Rejected` and appends a
   history entry with the reason. Used for:
@@ -418,24 +433,23 @@ the first few days of the EP process, it's looser.
   Rejected EPs stay in the repo on purpose — the "we considered this
   and said no" record is load-bearing for avoiding re-litigation.
 
-## Updating EPs — bidirectional links are mandatory
+## Updating EPs — strong links are bidirectional
 
-Forward-reference metadata (`extended-by`, `superseded-by`, `see-also`)
-is the navigation layer. A reader landing on an old EP should be able
-to discover follow-up work without guessing. This only works if the
-links are kept bidirectional.
+Relationship metadata is the navigation layer. A reader landing on an
+old EP should be able to discover direct follow-up work without guessing.
 
-**The rule:** when a new EP extends or supersedes an older one, the
-same PR that adds the new EP **must** also update the older EP's
-frontmatter. Both changes ship together or neither ships.
+**The rule:** `extends` / `extended-by` and `supersedes` /
+`superseded-by` are reciprocal pairs. The same PR updates both sides.
+`requires` is a must-read dependency and `see-also` is a loose
+relationship; neither implies extension or reciprocal metadata.
 
 Examples:
 
-- **EP-8 extends EP-2.** EP-8's frontmatter lists `requires: [2]` or
-  `see-also: [2]`; the PR that adds EP-8 also updates EP-2's
+- **EP-8 extends EP-2.** EP-8's frontmatter lists `extends: [2]`; the
+  PR that adds EP-8 also updates EP-2's
   frontmatter to include `extended-by: [..., 8]`.
 - **EP-12 supersedes EP-4.** EP-12's frontmatter has `supersedes:
-  [4]`; the PR updates EP-4 to set `superseded-by: 12` and
+  [4]`; the PR updates EP-4 to set `superseded-by: [12]` and
   `status: Superseded`.
 
 Rationale: without this rule, forward-links rot immediately — nobody
@@ -458,7 +472,7 @@ is trivial at most project throughputs.
 Considered just keeping `docs/specs/` and calling it a day. Rejected
 because EPs add value beyond "spec documents":
 
-- Named status lifecycle (`Draft → Accepted → Implemented`) that tells
+- Named status lifecycle (`Draft → Accepted → Partial → Implemented`) that tells
   readers what they can rely on.
 - Append-only contract after acceptance that keeps history honest.
 - Numbered citations that simplify cross-references.

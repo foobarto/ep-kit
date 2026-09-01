@@ -7,11 +7,11 @@ Use this checklist when reviewing an Enhancement Proposal PR. Not every item app
 - [ ] `ep` number matches the filename (NNNN)
 - [ ] `title` is descriptive and under ~60 chars
 - [ ] `author` has name and email
-- [ ] `status` is valid (`Placeholder`, `Draft`, `Accepted`, `Implemented`, `Superseded`, `Withdrawn`, `Rejected`)
+- [ ] `status` is valid (`Placeholder`, `Draft`, `Accepted`, `Partial`, `Implemented`, `Superseded`, `Withdrawn`, `Rejected`)
 - [ ] `type` is valid (`Standards`, `Informational`, `Process`)
 - [ ] `created` is a valid YYYY-MM-DD date
 - [ ] `history` has at least one entry matching the current status
-- [ ] Optional fields (`requires`, `supersedes`, `see-also`) reference real EP numbers
+- [ ] Optional relationship fields (`requires`, `extends`, `supersedes`, `superseded-by`, `extended-by`, `see-also`) reference real EP numbers
 - [ ] All EP-reference fields use YAML list syntax even for single values (`[4]`, not `4`)
 
 ## Structure
@@ -47,12 +47,13 @@ Use this checklist when reviewing an Enhancement Proposal PR. Not every item app
 
 ## Bidirectional links
 
-- [ ] If this EP `requires` another, the dependency is real and should be read first
+- [ ] If this EP `requires` another, the dependency is real and should be read first; no reciprocal extension is implied
 - [ ] If this EP `supersedes` another, the old EP's frontmatter is updated in this PR:
   - [ ] `superseded-by` set to this EP's number
   - [ ] `status` changed to `Superseded`
   - [ ] New `history` entry appended
 - [ ] If this EP `extends` another, the old EP's `extended-by` is updated in this PR
+- [ ] If another EP lists this one in `extended-by`, this EP has the reciprocal `extends`
 - [ ] If this EP `see-also` another, the reference is actually relevant
 
 ## Scope
@@ -76,8 +77,8 @@ Use this checklist when reviewing an Enhancement Proposal PR. Not every item app
 - [ ] At least 1–2 decision log entries for settled things
 - [ ] Remaining decision log entries flagged as "to be captured during brainstorm"
 
-## If status change (Draft → Accepted, Accepted → Implemented, etc.)
+## If status change (Draft → Accepted, Accepted → Partial/Implemented, etc.)
 
 - [ ] New `history` entry appended with date, status, and note
-- [ ] If Implemented, `implemented-in` version is set
+- [ ] If an Implemented Standards EP, `implemented-in` version is set
 - [ ] If Superseded, `superseded-by` is set and matches history entry

@@ -3,20 +3,8 @@ name: Validate EPs
 on:
   push:
     branches: [main]
-    paths:
-      - 'docs/eps/**'
-      - 'docs/geps/**'
-      - 'examples/**'
-      - 'validate.sh'
-      - '.ep-kit'
   pull_request:
     branches: [main]
-    paths:
-      - 'docs/eps/**'
-      - 'docs/geps/**'
-      - 'examples/**'
-      - 'validate.sh'
-      - '.ep-kit'
 
 permissions:
   contents: read
@@ -44,3 +32,6 @@ jobs:
             echo "No EP directory found"
             exit 1
           fi
+
+      - name: Run regression tests
+        run: tests/test.sh
