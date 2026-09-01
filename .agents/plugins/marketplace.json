@@ -1,11 +1,11 @@
 {
-  "name": "ep-kit",
+  "name": "strata",
   "interface": {
-    "displayName": "EP Kit"
+    "displayName": "Strata"
   },
   "plugins": [
     {
-      "name": "ep-kit",
+      "name": "strata",
       "source": {
         "source": "url",
         "url": "./"

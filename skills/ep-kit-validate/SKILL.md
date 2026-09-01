@@ -3,7 +3,7 @@ name: ep-kit-validate
 description: Use when the user wants to review or validate an existing Enhancement Proposal for semantic quality. Triggers on phrases like "review this EP", "validate EP-0003", "is this EP good?", "check EP quality", "EP review". Performs a thorough semantic audit covering problem clarity, decision log honesty, scope correctness, alternative quality, and internal consistency.
 ---
 
-# EP Kit: Validate an EP
+# Strata: Validate an EP
 
 Perform a **semantic review** of an Enhancement Proposal. This is the
 quality gate that runs after the mechanical validator (`validate.sh`)

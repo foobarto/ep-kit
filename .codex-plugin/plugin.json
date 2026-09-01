@@ -1,13 +1,13 @@
 {
-  "name": "ep-kit",
-  "version": "1.2.0",
-  "description": "Repository-local governance for durable architecture decisions and Enhancement Proposals.",
+  "name": "strata",
+  "version": "1.3.0",
+  "description": "Durable, repository-local governance for architecture decisions and Enhancement Proposals.",
   "author": {
     "name": "Bartosz Ptaszynski",
     "url": "https://github.com/foobarto"
   },
-  "homepage": "https://github.com/foobarto/ep-kit",
-  "repository": "https://github.com/foobarto/ep-kit",
+  "homepage": "https://github.com/foobarto/strata",
+  "repository": "https://github.com/foobarto/strata",
   "license": "MIT OR Apache-2.0",
   "keywords": [
     "architecture",
@@ -18,7 +18,7 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "EP Kit",
+    "displayName": "Strata",
     "shortDescription": "Govern durable architecture decisions",
     "longDescription": "Classify project changes, author and review Enhancement Proposals, preserve rationale, and track implementation status without imposing an implementation methodology.",
     "developerName": "Bartosz Ptaszynski",
@@ -28,7 +28,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/foobarto/ep-kit",
+    "websiteURL": "https://github.com/foobarto/strata",
     "defaultPrompt": [
       "Check whether this project change needs an EP.",
       "Create an EP for this architectural decision.",

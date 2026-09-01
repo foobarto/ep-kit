@@ -1,6 +1,13 @@
-# Enhancement Proposal Kit (EP Kit)
+# Strata
 
-A reusable framework for capturing, reviewing, and tracking design decisions in software projects. Borrowed from Python's PEP process, Rust's RFCs, and Kubernetes' KEPs — but packaged as a portable skill + template set for AI-assisted development workflows.
+A reusable framework for capturing, reviewing, and tracking durable design
+decisions in software projects. Borrowed from Python's PEP process, Rust's
+RFCs, and Kubernetes' KEPs — but packaged as portable Agent Skills, templates,
+and deterministic validation for AI-assisted development workflows.
+
+Strata was named **EP Kit** through version 1.2.0. Existing protocol surfaces
+remain stable: `.ep-kit`, `EP-NNNN` citations, and the `ep-kit*` skill and agent
+identifiers are retained for installed-project and cross-tool compatibility.
 
 ## What's in the box
 
@@ -15,7 +22,7 @@ A reusable framework for capturing, reviewing, and tracking design decisions in 
 | `agents/ep-kit-reviewer.md` | Optional Claude plugin agent for independent, read-only EP review |
 | `.codex-plugin/`, `.claude-plugin/` | Native Codex and Claude plugin metadata |
 | `.agents/plugins/marketplace.json` | Codex marketplace catalogue |
-| `CHANGELOG.md` | EP Kit version history |
+| `CHANGELOG.md` | Strata version history |
 | `templates/0000-template.md` | Skeleton for new EPs |
 | `templates/0001-ep-purpose-and-guidelines.md` | Process document (conventions, lifecycle, rules) |
 | `templates/README.md` | Index template for your project's EP directory |
@@ -68,13 +75,13 @@ EP-worthy decisions into authoring, apply Draft/Accepted gates, and return
 after delivery to assess `Partial` versus `Implemented`. Activation remains
 model-driven, so use the behavioral evaluations when changing trigger wording.
 
-**Validate mechanically:** Run `scripts/validate-eps.sh` for deterministic checks: frontmatter syntax, file naming, catalogue drift, strong reciprocal links, decision log format, section presence, and shipped-release metadata. In the EP Kit checkout itself, run `./validate.sh examples/`.
+**Validate mechanically:** Run `scripts/validate-eps.sh` for deterministic checks: frontmatter syntax, file naming, catalogue drift, strong reciprocal links, decision log format, section presence, and shipped-release metadata. In the Strata checkout itself, run `./validate.sh examples/`.
 
 **Review semantically:** Tell your AI assistant "review EP-0003" — the validation skill audits problem clarity, decision log honesty, scope discipline, and internal consistency.
 
 ## The two-layer validation model
 
-EP Kit uses a two-layer approach:
+Strata uses a two-layer approach:
 
 ```
 ┌─────────────────────────────────────┐
@@ -113,7 +120,7 @@ The script is the gate — if it fails, don't bother the AI. The skill is the re
 
 ## The activation layer
 
-EP Kit installs a separate governance skill so the authoring skill does not
+Strata installs a separate governance skill so the authoring skill does not
 need to be invoked by name. Its discoverable trigger covers the start, resume,
 and completion of project changes in repositories containing `.ep-kit`.
 
@@ -127,7 +134,7 @@ The preflight deliberately exits quickly for work that should not create an EP:
 
 For EP-worthy Architectural work, the EP replaces a parallel design-spec
 artifact. Once Accepted, its path becomes the specification passed to whatever
-implementation-planning method the project uses. EP Kit does not prescribe
+implementation-planning method the project uses. Strata does not prescribe
 TDD, worktrees, subagents, debugging, or plan format.
 
 After implementation, the same skill compares delivered evidence with the
@@ -217,20 +224,20 @@ deterministic regression suite in `tests/test.sh`.
 
 ## Optional companion: Cairn
 
-[Cairn](https://github.com/foobarto/cairn) complements EP Kit without being a
-dependency. EP Kit manages the life of a durable decision; Cairn manages the
+[Cairn](https://github.com/foobarto/cairn) complements Strata without being a
+dependency. Strata manages the life of a durable decision; Cairn manages the
 life of implementation work and sessions. When both are present:
 
 - ideas or implementation discoveries may first surface in a Cairn work log;
-- architectural decisions are promoted into EP Kit;
+- architectural decisions are promoted into Strata;
 - Accepted or Partial EPs may be decomposed into Cairn execution tasks;
 - Cairn may cite `EP-NNNN` and `EP-NNNN D<N>`;
-- discoveries that invalidate an accepted decision return to EP Kit as an
+- discoveries that invalidate an accepted decision return to Strata as an
   extending or superseding proposal; and
-- Cairn's close or Ship workflow may invoke EP Kit's completion checkpoint to
+- Cairn's close or Ship workflow may invoke Strata's completion checkpoint to
   reconcile `Accepted`, `Partial`, and `Implemented` under existing authority.
 
-EP Kit does not read or write Cairn journals, punch lists, profiles, autonomy
+Strata does not read or write Cairn journals, punch lists, profiles, autonomy
 settings, plans, review orchestration, or Ship state. Neither project installs,
 imports, or controls the other; the integration is only the textual citation
 and lifecycle protocol above.
@@ -247,24 +254,45 @@ For native marketplace installation:
 
 ```bash
 # Codex
-codex plugin marketplace add foobarto/ep-kit
-codex plugin add ep-kit@ep-kit
+codex plugin marketplace add foobarto/strata
+codex plugin add strata@strata
 
 # Claude Code
-claude plugin marketplace add foobarto/ep-kit
-claude plugin install ep-kit@ep-kit
+claude plugin marketplace add foobarto/strata
+claude plugin install strata@strata
 ```
+
+Marketplace installs from EP Kit 1.2.0 and earlier use the old
+`ep-kit@ep-kit` identity and do not upgrade in place. Reinstall once under the
+new identity:
+
+```bash
+# Codex
+codex plugin remove ep-kit@ep-kit
+codex plugin marketplace remove ep-kit
+codex plugin marketplace add foobarto/strata
+codex plugin add strata@strata
+
+# Claude Code
+claude plugin uninstall ep-kit@ep-kit
+claude plugin marketplace remove ep-kit
+claude plugin marketplace add foobarto/strata
+claude plugin install strata@strata
+```
+
+Repository-vendored installations need no identity migration; their `.ep-kit`
+configuration and `ep-kit*` skill directories remain supported.
 
 Marketplace installation delivers agent behavior; it does not scaffold a
 target repository. Initialize that repository with `./install.sh --no-skills`
-from an EP Kit checkout so it receives `.ep-kit`, EP-0001, templates, and the
+from a Strata checkout so it receives `.ep-kit`, EP-0001, templates, and the
 project validator without duplicating the globally installed skill IDs. Use
 plain `./install.sh` instead when repository-vendored, version-pinned skills
 are preferred; no marketplace install is needed in that model.
 
 Claude also discovers the optional `ep-kit-reviewer` agent. It provides an
 independent, read-only semantic and implementation-status review; it is not an
-activation hook and EP Kit does not require subagents. Codex and other Agent
+activation hook and Strata does not require subagents. Codex and other Agent
 Skills clients receive the same three core skills without depending on that
 Claude-specific agent surface.
 

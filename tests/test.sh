@@ -118,13 +118,23 @@ codex = json.loads((root / ".codex-plugin/plugin.json").read_text())
 codex_market = json.loads((root / ".agents/plugins/marketplace.json").read_text())
 claude = json.loads((root / ".claude-plugin/plugin.json").read_text())
 claude_market = json.loads((root / ".claude-plugin/marketplace.json").read_text())
-assert codex["name"] == "ep-kit" and codex["skills"] == "./skills/"
-assert codex_market["plugins"][0]["name"] == "ep-kit"
+assert codex["name"] == "strata" and codex["skills"] == "./skills/"
+assert codex["homepage"] == codex["repository"] == "https://github.com/foobarto/strata"
+assert codex_market["name"] == "strata"
+assert codex_market["plugins"][0]["name"] == "strata"
 assert codex_market["plugins"][0]["source"] == {"source": "url", "url": "./"}
-assert claude["name"] == "ep-kit"
+assert claude["name"] == "strata"
+assert claude["homepage"] == claude["repository"] == "https://github.com/foobarto/strata"
+assert claude_market["name"] == "strata"
+assert claude_market["plugins"][0]["name"] == "strata"
 assert claude_market["plugins"][0]["source"] == "./"
-assert codex["version"] == claude["version"] == claude_market["version"] == "1.2.0"
+assert codex["version"] == claude["version"] == claude_market["version"] == "1.3.0"
 PY
+if grep -Rqs --exclude-dir=.git --exclude-dir=.tmp \
+    --exclude=CHANGELOG.md --exclude=test.sh \
+    'github.com/foobarto/ep-kit' "$ROOT"; then
+    fail "canonical project metadata still references the pre-Strata repository URL"
+fi
 grep -qx 'name: ep-kit-reviewer' "$ROOT/agents/ep-kit-reviewer.md"
 grep -qx 'tools: Read, Glob, Grep' "$ROOT/agents/ep-kit-reviewer.md"
 
@@ -460,7 +470,8 @@ mkdir -p "$TEST_TMP/install"
 [[ -f "$TEST_TMP/install/.agents/skills/ep-kit/SKILL.md" ]] || fail "creation skill missing"
 [[ -f "$TEST_TMP/install/.agents/skills/ep-kit-validate/SKILL.md" ]] || fail "validation skill missing"
 grep -qx 'validator=scripts/validate-eps.sh' "$TEST_TMP/install/.ep-kit"
-grep -qx 'kit_version=1.2.0' "$TEST_TMP/install/.ep-kit"
+grep -qx 'kit_version=1.3.0' "$TEST_TMP/install/.ep-kit"
+grep -q '^# Strata configuration' "$TEST_TMP/install/.ep-kit"
 expect_failure "$ROOT/install.sh" --dry-run docs/eps second-target >/dev/null 2>&1
 mkdir -p "$TEST_TMP/missing-option"
 (
@@ -493,7 +504,7 @@ cmp -s "$ROOT/skills/ep-kit/SKILL.md" "$TEST_TMP/install/.agents/skills/ep-kit/S
 cmp -s "$ROOT/skills/ep-kit-validate/SKILL.md" "$TEST_TMP/install/.agents/skills/ep-kit-validate/SKILL.md"
 cmp -s "$ROOT/skills/ep-kit-validate/CHECKLIST.md" "$TEST_TMP/install/.agents/skills/ep-kit-validate/CHECKLIST.md"
 grep -qx 'validator=scripts/validate-eps.sh' "$TEST_TMP/install/.ep-kit"
-grep -qx 'kit_version=1.2.0' "$TEST_TMP/install/.ep-kit"
+grep -qx 'kit_version=1.3.0' "$TEST_TMP/install/.ep-kit"
 grep -qx 'custom_key=preserve-me' "$TEST_TMP/install/.ep-kit"
 grep -qx 'project-owned template' "$TEST_TMP/install/docs/eps/0000-template.md"
 

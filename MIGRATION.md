@@ -1,6 +1,6 @@
 # Migration Guide
 
-How to migrate from existing decision-tracking systems to EP Kit.
+How to migrate from existing decision-tracking systems to Strata.
 
 ## From ADR (Architecture Decision Records)
 
@@ -171,9 +171,9 @@ For each significant decision document:
 ### Step 3: Set up validation
 
 ```bash
-# Install EP Kit (the installer needs its sibling templates and validator)
-git clone --depth 1 https://github.com/foobarto/ep-kit.git .tmp/ep-kit
-.tmp/ep-kit/install.sh
+# Install Strata (the installer needs its sibling templates and validator)
+git clone --depth 1 https://github.com/foobarto/strata.git .tmp/strata
+.tmp/strata/install.sh
 
 # Validate
 scripts/validate-eps.sh docs/eps/

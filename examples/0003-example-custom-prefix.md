@@ -1,7 +1,7 @@
 ---
 ep: 3
 title: Example — Custom Prefix Configuration
-author: EP Kit Team <team@ep-kit.example>
+author: Strata Team <team@strata.example>
 status: Draft
 type: Informational
 created: 2026-04-17
@@ -12,7 +12,7 @@ history:
 
 ## Problem
 
-The EP Kit supports configurable frontmatter field names via the `prefix` key in `.ep-kit`, but the default examples all use `ep:`. Users need a concrete example showing how to use a custom prefix like `design:` or `adr:` to match their existing conventions.
+Strata supports configurable frontmatter field names via the `prefix` key in `.ep-kit`, but the default examples all use `ep:`. Users need a concrete example showing how to use a custom prefix like `design:` or `adr:` to match their existing conventions.
 
 ## Goals
 

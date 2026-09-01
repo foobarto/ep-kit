@@ -1227,7 +1227,7 @@ main() {
     fi
 
     if [[ ! "$PREFIX" =~ ^[[:alpha:]_][[:alnum:]_-]*$ ]]; then
-        echo "Invalid prefix in EP Kit config: $PREFIX" >&2
+        echo "Invalid prefix in Strata config: $PREFIX" >&2
         exit 1
     fi
 

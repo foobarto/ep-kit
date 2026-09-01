@@ -1,6 +1,19 @@
 # Changelog
 
-All notable changes to the EP Kit itself.
+All notable changes to Strata.
+
+## [1.3.0] — 2026-09-01
+
+### Changed
+
+- Renamed the public project and distribution from EP Kit to **Strata**, with
+  the canonical repository moving to `foobarto/strata`.
+- Renamed the Codex and Claude marketplace/plugin identity to `strata` and
+  updated installation, homepage, repository, and companion-project links.
+- Documented the one-time marketplace reinstall required when upgrading an
+  existing `ep-kit@ep-kit` installation to `strata@strata`.
+- Preserved `.ep-kit`, `EP-NNNN` / `EP-NNNN D<N>`, and the `ep-kit*` skill and
+  agent identifiers as stable compatibility and cross-tool protocol surfaces.
 
 ## [1.2.0] — 2026-09-01
 

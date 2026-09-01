@@ -1,9 +1,9 @@
 ---
 name: ep-kit
-description: Use when an EP Kit governance preflight routes an architectural decision to proposal authoring, or when the user explicitly asks to create, extend, or supersede an Enhancement Proposal. Do not use to classify ordinary project work; use ep-kit-governance first.
+description: Use when a Strata governance preflight routes an architectural decision to proposal authoring, or when the user explicitly asks to create, extend, or supersede an Enhancement Proposal. Do not use to classify ordinary project work; use ep-kit-governance first.
 ---
 
-# Enhancement Proposal Kit: Write a New EP
+# Strata: Write a New EP
 
 Guide the user through creating a new **Enhancement Proposal**
 in the project's EP directory. An EP is a numbered design record — see
@@ -50,8 +50,8 @@ Path to `validate.sh`. Resolve in this order:
    - `validate.sh` adjacent to this `SKILL.md` (the plugin/skill-bundled helper;
      resolve it relative to the loaded skill, not the working directory)
    - `scripts/validate-eps.sh` (default vendored installation)
-   - `<ep_dir>/../../validate.sh` (ep-kit installed as sibling)
-   - `<ep_dir>/../validate.sh` (ep-kit installed as parent)
+   - `<ep_dir>/../../validate.sh` (Strata installed as sibling)
+   - `<ep_dir>/../validate.sh` (Strata installed as parent)
    - `.agents/skills/ep-kit/validate.sh` (skill directory)
    - `.claude/skills/ep-kit/validate.sh` (skill directory)
 3. **Auto-configure** — if a project-relative validator is found via
@@ -62,7 +62,7 @@ Path to `validate.sh`. Resolve in this order:
    cache path for the skill-bundled helper; use it only for the current run.
 4. **Not found** — if no validator is found, skip mechanical
    validation. Tell the user: "Validator not found. Run `install.sh`
-   from the ep-kit directory or set `validator=` in `.ep-kit`."
+   from a Strata checkout or set `validator=` in `.ep-kit`."
 
 Substitute `<ep_dir>`, `<prefix>`, and `<validator>` everywhere below.
 
@@ -76,7 +76,7 @@ dir=docs/eps               # EP directory (relative to config file)
 prefix=ep                  # frontmatter field name (default: ep)
 validator=scripts/validate-eps.sh  # path relative to the config file
 skip_sections=1            # skip required section checks (for retrofits)
-kit_version=1.2.0          # ep-kit version this config was generated for
+kit_version=1.3.0          # Strata version this config was generated for
 ```
 
 ## Setup check
@@ -86,7 +86,7 @@ template:
 
 - If `<ep_dir>/0000-template.md` exists → proceed.
 - If it doesn't exist → tell the user: "EP directory not scaffolded.
-  Run `install.sh` from the ep-kit directory first, or create
+  Run `install.sh` from a Strata checkout first, or create
   `<ep_dir>/` with `0000-template.md` and
   `0001-ep-purpose-and-guidelines.md`." Do not proceed until the
   directory is ready.

@@ -1,7 +1,7 @@
 ---
 ep: 2
 title: Example — Standards EP (Proposed Change)
-author: EP Kit <ep-kit@example.com>
+author: Strata <strata@example.com>
 status: Draft
 type: Standards
 created: 2026-04-17

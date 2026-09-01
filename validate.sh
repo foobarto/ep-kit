@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Repository entry point for the validator bundled with the ep-kit skill.
+# Repository entry point for the validator bundled with Strata's ep-kit skill.
 
 set -euo pipefail
 

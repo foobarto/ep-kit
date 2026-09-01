@@ -1,12 +1,12 @@
 ---
 name: ep-kit-governance
-description: Use before planning, implementing, resuming, or completing project changes in a repository containing .ep-kit. Classifies work as Spike, Bounded, or Architectural; routes EP-worthy decisions into EP Kit; enforces proposal lifecycle gates; and checks implementation status. Do not use for read-only questions unrelated to a proposed or completed change.
+description: Use before planning, implementing, resuming, or completing project changes in a repository containing .ep-kit. Classifies work as Spike, Bounded, or Architectural; routes EP-worthy decisions into Strata; enforces proposal lifecycle gates; and checks implementation status. Do not use for read-only questions unrelated to a proposed or completed change.
 ---
 
-# EP Kit: Govern a Project Change
+# Strata: Govern a Project Change
 
 Keep architectural decisions connected to implementation without turning every
-change into an EP. This skill is the project-level activation layer for EP Kit.
+change into an EP. This skill is the project-level activation layer for Strata.
 It routes work; `ep-kit` authors proposals and `ep-kit-validate` reviews them.
 
 ## Start here
@@ -146,7 +146,7 @@ that authority. When authorized:
 
 ## Interoperability
 
-EP Kit owns the durable architectural record, not the implementation method.
+Strata owns the durable architectural record, not the implementation method.
 When another methodology is present:
 
 - reuse its Spike / Bounded / Architectural result if equivalent;
@@ -169,7 +169,7 @@ review, or implementation-plan format. Those remain downstream policy choices.
 Keep the routing result concise:
 
 ```text
-EP Kit: <Spike | Bounded | Architectural>
+Strata: <Spike | Bounded | Architectural>
 Governance: <no EP | EP required | governed by EP-NNNN>
 Gate: <may proceed | needs Draft/Placeholder work | needs acceptance | needs new EP>
 Next: <one concrete action>

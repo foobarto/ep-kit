@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EP Kit installer — scaffolds docs/eps/ in your project with templates.
+# Strata installer — scaffolds docs/eps/ in your project with templates.
 #
 # Usage:
 #   ./install.sh                  # uses docs/eps/ and .agents/skills/ defaults
@@ -27,7 +27,7 @@ UPDATE_TOOLS=false
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SKILLS_SOURCE_DIR="$SCRIPT_DIR/skills"
 SOURCE_VALIDATOR="$SKILLS_SOURCE_DIR/ep-kit/validate.sh"
-KIT_VERSION="1.2.0"
+KIT_VERSION="1.3.0"
 
 usage() {
     sed -n '2,/^$/s/^# \?//p' "$0"
@@ -115,7 +115,7 @@ run() {
     fi
 }
 
-echo "EP Kit installer"
+echo "Strata installer"
 echo "================"
 echo ""
 echo "EP directory:  $EPS_DIR"
@@ -264,8 +264,8 @@ else
         echo "[dry-run] write $CONFIG_FILE"
     else
         cat > "$CONFIG_FILE" <<EOF
-# EP Kit configuration
-# See the EP Kit README for available keys
+# Strata configuration (legacy filename retained for compatibility)
+# See the Strata README for available keys
 
 dir=$EPS_DIR
 prefix=ep

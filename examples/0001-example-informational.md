@@ -1,7 +1,7 @@
 ---
 ep: 1
 title: Example — Informational EP (Decision Record)
-author: EP Kit <ep-kit@example.com>
+author: Strata <strata@example.com>
 status: Accepted
 type: Informational
 created: 2026-04-17
@@ -11,7 +11,7 @@ history:
     note: Initial draft — example Informational EP.
   - date: 2026-04-18
     status: Accepted
-    note: Accepted as the canonical example for the EP Kit.
+    note: Accepted as the canonical example for Strata.
 ---
 
 # EP-0001: Example — Informational EP (Decision Record)
